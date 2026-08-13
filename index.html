@@ -288,33 +288,37 @@
 <script>
 // ---------------------------------------------------------------
 // PLATE REGISTRY
-// Each entry: n, slug, title, desc, file, ready.
+// Each entry: n, slug, title, desc, file, ready, v.
 // TO ADD A MAP: drop its HTML file into /maps/, then fill in
 // title / desc / file / ready:true for that plate below.
+// TO UPDATE AN EXISTING MAP: replace the file in /maps/ and bump
+// that plate's "v" number by 1. This changes the iframe's URL
+// (file + ?v=N) so browsers/CDNs fetch the new file instead of
+// serving a cached copy of the old one under the same filename.
 // ---------------------------------------------------------------
 const PLATES = [
-  { n: 1,  slug: 'site-distribution', title: 'Archaeological Site Distribution', desc: 'Settlement locations by cultural period across the Vaigai basin, with elevation, boundary, river and district reference layers.', file: 'maps/plate-01-site-distribution.html', ready: true },
-  { n: 2,  slug: 'contour-elevation', title: 'Contour & Elevation Zones', desc: 'Reclassified SRTM elevation bands (Sub Tidal to Upper Western Ghats) with 100m/500m contours, assessing settlement thresholds against site distribution.', file: 'maps/plate-02-contour-elevation.html', ready: true },
-  { n: 3,  slug: 'slope-gradient', title: 'Topographic Gradient (Slope)', desc: 'Reclassified SRTM slope gradient (Flat to Very Steep) overlaid with settlement distribution, assessing terrain constraints on site location.', file: 'maps/plate-03-slope-gradient.html', ready: true },
-  { n: 4,  slug: 'plate-04', title: 'Plate 04', desc: 'Awaiting map file.', file: null, ready: false },
-  { n: 5,  slug: 'dem-hypsometric', title: 'DEM & Hypsometric Analysis', desc: 'Classified elevation zones (30m) from Sub Tidal to Upper Western Ghats, with hypsometric integral value, site distribution by cultural group, river and boundary reference layers.', file: 'maps/plate-05-dem-hypsometric.html', ready: true },
-  { n: 6,  slug: 'plate-06', title: 'Plate 06', desc: 'Awaiting map file.', file: null, ready: false },
-  { n: 7,  slug: 'plate-07', title: 'Plate 07', desc: 'Awaiting map file.', file: null, ready: false },
-  { n: 8,  slug: 'plate-08', title: 'Plate 08', desc: 'Awaiting map file.', file: null, ready: false },
-  { n: 9,  slug: 'plate-09', title: 'Plate 09', desc: 'Awaiting map file.', file: null, ready: false },
-  { n: 10, slug: 'plate-10', title: 'Plate 10', desc: 'Awaiting map file.', file: null, ready: false },
-  { n: 11, slug: 'plate-11', title: 'Plate 11', desc: 'Awaiting map file.', file: null, ready: false },
-  { n: 12, slug: 'plate-12', title: 'Plate 12', desc: 'Awaiting map file.', file: null, ready: false },
-  { n: 13, slug: 'plate-13', title: 'Plate 13', desc: 'Awaiting map file.', file: null, ready: false },
-  { n: 14, slug: 'plate-14', title: 'Plate 14', desc: 'Awaiting map file.', file: null, ready: false },
-  { n: 15, slug: 'plate-15', title: 'Plate 15', desc: 'Awaiting map file.', file: null, ready: false },
-  { n: 16, slug: 'plate-16', title: 'Plate 16', desc: 'Awaiting map file.', file: null, ready: false },
-  { n: 17, slug: 'plate-17', title: 'Plate 17', desc: 'Awaiting map file.', file: null, ready: false },
-  { n: 18, slug: 'plate-18', title: 'Plate 18', desc: 'Awaiting map file.', file: null, ready: false },
-  { n: 19, slug: 'plate-19', title: 'Plate 19', desc: 'Awaiting map file.', file: null, ready: false },
-  { n: 20, slug: 'plate-20', title: 'Plate 20', desc: 'Awaiting map file.', file: null, ready: false },
-  { n: 21, slug: 'plate-21', title: 'Plate 21', desc: 'Awaiting map file.', file: null, ready: false },
-  { n: 22, slug: 'plate-22', title: 'Plate 22', desc: 'Awaiting map file.', file: null, ready: false },
+  { n: 1,  slug: 'site-distribution', title: 'Archaeological Site Distribution', desc: 'Settlement locations by cultural period across the Vaigai basin, with elevation, boundary, river and district reference layers.', file: 'maps/plate-01-site-distribution.html', ready: true, v: 2 },
+  { n: 2,  slug: 'plate-02', title: 'Plate 02', desc: 'Awaiting map file.', file: null, ready: false, v: 1 },
+  { n: 3,  slug: 'plate-03', title: 'Plate 03', desc: 'Awaiting map file.', file: null, ready: false, v: 1 },
+  { n: 4,  slug: 'plate-04', title: 'Plate 04', desc: 'Awaiting map file.', file: null, ready: false, v: 1 },
+  { n: 5,  slug: 'plate-05', title: 'Plate 05', desc: 'Awaiting map file.', file: null, ready: false, v: 1 },
+  { n: 6,  slug: 'plate-06', title: 'Plate 06', desc: 'Awaiting map file.', file: null, ready: false, v: 1 },
+  { n: 7,  slug: 'plate-07', title: 'Plate 07', desc: 'Awaiting map file.', file: null, ready: false, v: 1 },
+  { n: 8,  slug: 'plate-08', title: 'Plate 08', desc: 'Awaiting map file.', file: null, ready: false, v: 1 },
+  { n: 9,  slug: 'plate-09', title: 'Plate 09', desc: 'Awaiting map file.', file: null, ready: false, v: 1 },
+  { n: 10, slug: 'plate-10', title: 'Plate 10', desc: 'Awaiting map file.', file: null, ready: false, v: 1 },
+  { n: 11, slug: 'plate-11', title: 'Plate 11', desc: 'Awaiting map file.', file: null, ready: false, v: 1 },
+  { n: 12, slug: 'plate-12', title: 'Plate 12', desc: 'Awaiting map file.', file: null, ready: false, v: 1 },
+  { n: 13, slug: 'plate-13', title: 'Plate 13', desc: 'Awaiting map file.', file: null, ready: false, v: 1 },
+  { n: 14, slug: 'plate-14', title: 'Plate 14', desc: 'Awaiting map file.', file: null, ready: false, v: 1 },
+  { n: 15, slug: 'plate-15', title: 'Plate 15', desc: 'Awaiting map file.', file: null, ready: false, v: 1 },
+  { n: 16, slug: 'plate-16', title: 'Plate 16', desc: 'Awaiting map file.', file: null, ready: false, v: 1 },
+  { n: 17, slug: 'plate-17', title: 'Plate 17', desc: 'Awaiting map file.', file: null, ready: false, v: 1 },
+  { n: 18, slug: 'plate-18', title: 'Plate 18', desc: 'Awaiting map file.', file: null, ready: false, v: 1 },
+  { n: 19, slug: 'plate-19', title: 'Plate 19', desc: 'Awaiting map file.', file: null, ready: false, v: 1 },
+  { n: 20, slug: 'plate-20', title: 'Plate 20', desc: 'Awaiting map file.', file: null, ready: false, v: 1 },
+  { n: 21, slug: 'plate-21', title: 'Plate 21', desc: 'Awaiting map file.', file: null, ready: false, v: 1 },
+  { n: 22, slug: 'plate-22', title: 'Plate 22', desc: 'Awaiting map file.', file: null, ready: false, v: 1 },
 ];
 
 function pad(n) { return String(n).padStart(2, '0'); }
@@ -400,9 +404,10 @@ function showHome() {
 function showPlate(plate) {
   homeView.classList.add('hidden');
   mapFrame.style.display = 'block';
-  if (mapFrame.getAttribute('data-current') !== plate.file) {
-    mapFrame.src = plate.file;
-    mapFrame.setAttribute('data-current', plate.file);
+  const src = plate.file + '?v=' + (plate.v || 1);
+  if (mapFrame.getAttribute('data-current') !== src) {
+    mapFrame.src = src;
+    mapFrame.setAttribute('data-current', src);
   }
   topbar.classList.add('show');
   crumbCurrent.textContent = `SHEET ${pad(plate.n)}/22 — ${plate.title.toUpperCase()}`;
