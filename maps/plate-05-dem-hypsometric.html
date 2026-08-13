@@ -60,6 +60,14 @@
     font-size: 12px; font-weight: 600; color: var(--accent); z-index: 999;
     border: 1px solid #dde;
   }
+  .river-label {
+    background: none !important; border: none !important; box-shadow: none !important;
+    font-family: Georgia, 'Times New Roman', serif; font-style: italic; font-weight: 700;
+    font-size: 12px; color: #1a5fb4; text-shadow: 0 0 3px #fff, 0 0 3px #fff, 0 0 3px #fff, 0 0 3px #fff;
+    white-space: nowrap; pointer-events: none;
+  }
+  .river-label.main-stem { font-size: 13.5px; color: #0f3d75; }
+  .river-label::before { display: none; }
 </style>
 </head>
 <body>
@@ -103,6 +111,21 @@
       <div style="font-size:11.5px; margin-top:2px;">Geomorphic Stage: Old (Monadnock) — advanced erosion, stable low-relief alluvial landscape. Statistical method (Pike &amp; Wilson, 1971).</div>
     </div>
 
+    <h2>Vaigai River &amp; Sub-Tributaries</h2>
+    <div class="elev-legend" style="margin-bottom:12px;">
+      <div class="elev-item"><span class="swatch" style="background:#2a7fd4;"></span>Vaigai (main channel)</div>
+      <div class="elev-item"><span class="swatch" style="background:#2a7fd4;"></span>Upper Vaigai</div>
+      <div class="elev-item"><span class="swatch" style="background:#2a7fd4;"></span>Lower Vaigai</div>
+      <div class="elev-item"><span class="swatch" style="background:#2a7fd4;"></span>Manjalar</div>
+      <div class="elev-item"><span class="swatch" style="background:#2a7fd4;"></span>Sirumalaiyar</div>
+      <div class="elev-item"><span class="swatch" style="background:#2a7fd4;"></span>Varahanadhi</div>
+      <div class="elev-item"><span class="swatch" style="background:#2a7fd4;"></span>Theniar</div>
+      <div class="elev-item"><span class="swatch" style="background:#2a7fd4;"></span>Varattar–Nagalar</div>
+      <div class="elev-item"><span class="swatch" style="background:#2a7fd4;"></span>Suriliyar</div>
+      <div class="elev-item"><span class="swatch" style="background:#2a7fd4;"></span>Sathiar</div>
+      <div class="elev-item"><span class="swatch" style="background:#2a7fd4;"></span>Uppar</div>
+    </div>
+
     <h2>Filter by Cultural Group</h2>
     <div id="filters"></div>
 
@@ -111,7 +134,13 @@
     </div>
 
     <div class="note">
-      Site data: Balamurugan (2016) · Elevation (reclassified): SRTM 30m (NASA/USGS) · Rivers: HydroRIVERS (WWF), Bhukosh (GSI) · Admin boundaries: Bhukosh (GSI) · Projection: WGS 1984 UTM Zone 44N
+      <b style="display:block; color:var(--ink); font-style:normal; font-size:11px; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:4px;">Data Source</b>
+      Site Data: P. Balamurugan (2016)<br>
+      Study Area: Extended HydroSHEDS Vaigai Basin Boundary (WWF)<br>
+      Administrative Boundaries: Bhukosh (GSI)<br>
+      Vaigai River &amp; Tributaries: HydroRivers (WWF), Bhukosh (GSI); Tributary names: CCCDM, Anna University<br>
+      Elevation: SRTM 30m (NASA/USGS)<br>
+      Projection: WGS 1984 UTM Zone 44N
     </div>
   </div>
 </div>
@@ -154,6 +183,34 @@ const boundaryLayer = L.geoJSON(BOUNDARY_GEOJSON, {
 const riverLayer = L.geoJSON(RIVER_GEOJSON, {
   style: { color: '#2a7fd4', weight: 1.4, opacity: 0.85 }
 }).addTo(map);
+
+// Tributary name labels, placed on the map to match the reference
+// physiographic plate (Plate 1). Positions are approximate midpoints
+// along each named tributary/reach.
+const TRIBUTARY_LABELS = [
+  { name: 'Manjalar',          lat: 10.260, lng: 77.540, main: false },
+  { name: 'Sirumalaiyar',      lat: 10.237, lng: 77.660, main: false },
+  { name: 'Varahanadhi',       lat: 10.227, lng: 77.458, main: false },
+  { name: 'Theniar',           lat: 9.998,  lng: 77.321, main: false },
+  { name: 'Varattar - Nagalar',lat: 9.875,  lng: 77.576, main: false },
+  { name: 'Upper Vaigai',      lat: 9.773,  lng: 77.427, main: false },
+  { name: 'Suriliyar',         lat: 9.702,  lng: 77.254, main: false },
+  { name: 'Sathiar',           lat: 10.121, lng: 77.986, main: false },
+  { name: 'Uppar',             lat: 10.114, lng: 78.111, main: false },
+  { name: 'Lower Vaigai',      lat: 9.451,  lng: 78.593, main: false },
+  { name: 'Vaigai',            lat: 9.366,  lng: 78.812, main: true  }
+];
+const riverLabelLayer = L.layerGroup(
+  TRIBUTARY_LABELS.map(t => L.marker([t.lat, t.lng], {
+    opacity: 0,
+    interactive: false,
+    icon: L.divIcon({ className: '', html: '', iconSize: [0, 0] })
+  }).bindTooltip(t.name, {
+    permanent: true,
+    direction: 'center',
+    className: 'river-label' + (t.main ? ' main-stem' : '')
+  }))
+).addTo(map);
 
 const markers = {};
 const activePeriods = new Set(Object.keys(PERIOD_COLORS));
@@ -240,7 +297,8 @@ document.getElementById('toggle-boundary').addEventListener('change', (e) => {
   if (e.target.checked) boundaryLayer.addTo(map); else map.removeLayer(boundaryLayer);
 });
 document.getElementById('toggle-river').addEventListener('change', (e) => {
-  if (e.target.checked) riverLayer.addTo(map); else map.removeLayer(riverLayer);
+  if (e.target.checked) { riverLayer.addTo(map); riverLabelLayer.addTo(map); }
+  else { map.removeLayer(riverLayer); map.removeLayer(riverLabelLayer); }
 });
 document.getElementById('toggle-district').addEventListener('change', (e) => {
   if (e.target.checked) districtLayer.addTo(map); else map.removeLayer(districtLayer);
