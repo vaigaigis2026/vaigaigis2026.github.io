@@ -75,6 +75,16 @@
   .contour-line-legend { display:flex; align-items:center; gap:8px; padding:4px 0; font-size:12px; }
   .contour-line-legend .lswatch { width:22px; height:0; flex-shrink:0; }
 
+  /* Tributary name labels on the map */
+  .tributary-label {
+    font-family: Georgia, 'Times New Roman', serif;
+    font-size: 11.5px; font-style: italic; font-weight: 700;
+    color: #14406b; white-space: nowrap;
+    text-shadow: -1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff, 1px 1px 0 #fff, 0 0 4px #fff;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+  }
+
   /* SRTM 30m elevation ramp legend */
   #dem-legend { margin: 2px 0 10px; }
   #dem-legend .ramp {
@@ -131,6 +141,9 @@
     </div>
     <div class="layer-toggle">
       <label><input type="checkbox" id="toggle-river" checked> Vaigai River &amp; Tributaries</label>
+    </div>
+    <div class="layer-toggle">
+      <label><input type="checkbox" id="toggle-trib-labels" checked> Tributary Names</label>
     </div>
     <div class="layer-toggle">
       <label><input type="checkbox" id="toggle-district" checked> District Boundaries</label>
@@ -215,6 +228,57 @@ const districtLayer = L.geoJSON(DISTRICT_GEOJSON, {
 const riverLayer = L.geoJSON(RIVER_GEOJSON, {
   style: { color: '#2a7fd4', weight: 1.4, opacity: 0.85 }
 }).addTo(map);
+
+// ---- Tributary name labels ----
+// A handful of features carry a "Tributary" attribute (the named
+// mainstem/tributary segments). Label each at its line's midpoint.
+const tributaryLabelLayer = L.layerGroup().addTo(map);
+function lineMidpoint(coordsLL) {
+  // coordsLL: array of [lat, lng]. Returns the [lat, lng] at the line's midpoint by length.
+  let total = 0;
+  const segLens = [];
+  for (let i = 1; i < coordsLL.length; i++) {
+    const d = map.distance(coordsLL[i - 1], coordsLL[i]);
+    segLens.push(d);
+    total += d;
+  }
+  let target = total / 2;
+  for (let i = 0; i < segLens.length; i++) {
+    if (target <= segLens[i]) {
+      const t = segLens[i] === 0 ? 0 : target / segLens[i];
+      const [lat1, lng1] = coordsLL[i];
+      const [lat2, lng2] = coordsLL[i + 1];
+      return [lat1 + (lat2 - lat1) * t, lng1 + (lng2 - lng1) * t];
+    }
+    target -= segLens[i];
+  }
+  return coordsLL[Math.floor(coordsLL.length / 2)];
+}
+RIVER_GEOJSON.features.forEach(f => {
+  const name = f.properties && f.properties.Tributary;
+  if (!name) return;
+  const geom = f.geometry;
+  const lines = geom.type === 'LineString' ? [geom.coordinates] : geom.coordinates;
+  // Label the longest part if the feature is a MultiLineString
+  let longest = lines[0];
+  let longestLen = 0;
+  lines.forEach(line => {
+    const coordsLL = line.map(([lng, lat]) => [lat, lng]);
+    let len = 0;
+    for (let i = 1; i < coordsLL.length; i++) len += map.distance(coordsLL[i - 1], coordsLL[i]);
+    if (len > longestLen) { longestLen = len; longest = line; }
+  });
+  const coordsLL = longest.map(([lng, lat]) => [lat, lng]);
+  const mid = lineMidpoint(coordsLL);
+  L.marker(mid, {
+    icon: L.divIcon({
+      className: 'tributary-label',
+      html: `<span>${name}</span>`,
+      iconSize: null
+    }),
+    interactive: false
+  }).addTo(tributaryLabelLayer);
+});
 
 const markers = {};
 const activePeriods = new Set(Object.keys(PERIOD_COLORS));
@@ -322,6 +386,9 @@ document.getElementById('toggle-boundary').addEventListener('change', (e) => {
 });
 document.getElementById('toggle-river').addEventListener('change', (e) => {
   if (e.target.checked) riverLayer.addTo(map); else map.removeLayer(riverLayer);
+});
+document.getElementById('toggle-trib-labels').addEventListener('change', (e) => {
+  if (e.target.checked) tributaryLabelLayer.addTo(map); else map.removeLayer(tributaryLabelLayer);
 });
 document.getElementById('toggle-district').addEventListener('change', (e) => {
   if (e.target.checked) districtLayer.addTo(map); else map.removeLayer(districtLayer);
