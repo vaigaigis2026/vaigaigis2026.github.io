@@ -65,6 +65,34 @@
     font-size: 12px; font-weight: 600; color: var(--accent); z-index: 999;
     border: 1px solid #dde;
   }
+  #dem-legend {
+    display: flex; align-items: stretch; gap: 10px;
+    margin: 8px 0 10px; padding-left: 2px;
+  }
+  #dem-legend .ramp {
+    width: 16px; border-radius: 2px;
+    background: linear-gradient(to bottom,
+      #8a8a8a 0%,
+      #5a2a0a 14%,
+      #8b1a00 26%,
+      #c25a00 38%,
+      #e0a800 50%,
+      #cfe000 58%,
+      #4caf32 68%,
+      #a6e08a 82%,
+      #ddf5d0 92%,
+      #f3fbee 100%
+    );
+    flex-shrink: 0;
+  }
+  #dem-legend .ramp-labels {
+    display: flex; flex-direction: column; justify-content: space-between;
+    font-family: Arial, sans-serif; font-size: 11px; color: var(--ink);
+    padding: 1px 0;
+  }
+  #dem-legend .ramp-labels .hi, #dem-legend .ramp-labels .lo { line-height: 1.2; }
+  #dem-legend .ramp-labels .hi b, #dem-legend .ramp-labels .lo b { font-weight: 700; }
+  #dem-legend .ramp-labels .lo { color: var(--muted); }
 </style>
 </head>
 <body>
@@ -81,6 +109,13 @@
     <div class="layer-toggle">
       <label><input type="checkbox" id="toggle-dem" checked> SRTM 30m Hillshade</label>
       <input type="range" id="dem-opacity" min="0" max="100" value="65" style="width:80px;">
+    </div>
+    <div id="dem-legend">
+      <div class="ramp"></div>
+      <div class="ramp-labels">
+        <span class="hi">High<br><b>2649 m</b></span>
+        <span class="lo">Low<br><b>&minus;16 m</b></span>
+      </div>
     </div>
     <div class="layer-toggle">
       <label><input type="checkbox" id="toggle-boundary" checked> Study Area Boundary</label>
