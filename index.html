@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vaigai Valley GIS Archaeological Study — Atlas</title>
+<style>
+  :root{
+    --bg: #0d2038;
+    --paper: #0f2740;
+    --panel: #16324f;
+    --panel-2: #0d1f33;
+    --ink: #eef3f7;
+    --ink-dim: #c9d6e2;
+    --muted: #7f97ac;
+    --accent: #c99b53;
+    --accent-dim: #a37f42;
+    --teal: #4f8fa6;
+    --line: #2c4c6b;
+    --line-soft: #223d57;
+    --font-head: 'Arial Narrow', 'Helvetica Neue Condensed', Arial, sans-serif;
+    --font-body: Arial, Helvetica, sans-serif;
+    --font-mono: 'Courier New', Courier, monospace;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin:0; padding:0; height:100%; font-family: var(--font-body); background: var(--bg); color: var(--ink); }
+  a { color: inherit; }
+  #app { display:flex; flex-direction:column; height:100vh; }
+
+  /* ---------- Header ---------- */
+  header {
+    padding: 14px 20px;
+    background: linear-gradient(135deg, #0a1c30, #16324f);
+    color: var(--ink);
+    border-bottom: 1px solid var(--line);
+    z-index: 1000;
+    position: relative;
+    background-image:
+      linear-gradient(135deg, #0a1c30, #16324f),
+      repeating-linear-gradient(90deg, rgba(201,155,83,0.12) 0 1px, transparent 1px 40px);
+  }
+  .header-row { display:flex; align-items:flex-start; justify-content:space-between; gap: 12px; }
+  .site-brand { font-family: var(--font-mono); font-size: 10.5px; letter-spacing: 2px; opacity: 0.75; text-transform: uppercase; margin-bottom: 4px; color: var(--accent); }
+  header h1 { margin:0; font-family: var(--font-head); font-size: 20px; letter-spacing: 0.4px; font-weight: 700; text-transform: uppercase; cursor:pointer; }
+  header p.subtitle { margin: 4px 0 0; font-size: 12px; color: var(--ink-dim); font-family: var(--font-body); }
+  .header-actions { display:flex; gap:8px; flex-shrink:0; }
+  .pill-btn {
+    background: transparent; border: 1px solid var(--line);
+    color: var(--ink); font-family: var(--font-mono); font-size: 11px;
+    padding: 6px 12px; border-radius: 3px; cursor: pointer; white-space:nowrap;
+    letter-spacing: 0.5px; text-transform: uppercase;
+    transition: border-color .15s ease, color .15s ease;
+  }
+  .pill-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .pill-btn:focus-visible, button:focus-visible, input:focus-visible, [tabindex]:focus-visible {
+    outline: 2px solid var(--accent); outline-offset: 2px;
+  }
+
+  /* ---------- About panel ---------- */
+  #about-panel {
+    display: none; position: absolute; top: 66px; right: 20px; z-index: 1200;
+    background: var(--panel); border-radius: 6px; box-shadow: 0 8px 28px rgba(0,0,0,0.4);
+    padding: 18px 20px; width: 340px; max-width: calc(100vw - 40px); font-family: var(--font-body); font-size: 12.5px;
+    color: var(--ink-dim); line-height: 1.6; border: 1px solid var(--line);
+  }
+  #about-panel.open { display: block; }
+  #about-panel h3 { margin: 0 0 8px; font-family: var(--font-head); font-size: 16px; letter-spacing:.4px; text-transform:uppercase; color: var(--ink); }
+  #about-panel .about-row { margin-bottom: 8px; }
+  #about-panel .about-row b { display:block; color: var(--accent); font-family: var(--font-mono); font-size: 10px; text-transform: uppercase; letter-spacing: 1px; margin-bottom:2px; }
+  #about-panel .close-btn { position: absolute; top: 10px; right: 12px; cursor: pointer; color: var(--muted); font-size: 16px; background:none; border:none; }
+  #about-panel .close-btn:hover { color: var(--accent); }
+
+  /* ---------- Main layout ---------- */
+  #main { flex:1; display:flex; min-height:0; }
+
+  #sidebar {
+    width: 270px; flex-shrink:0;
+    background: var(--paper);
+    border-right: 1px solid var(--line);
+    display:flex; flex-direction:column;
+  }
+  #sidebar-search { padding: 12px 14px 8px; border-bottom: 1px solid var(--line-soft); }
+  #sidebar-search input {
+    width:100%; background: var(--panel-2); border: 1px solid var(--line); color: var(--ink);
+    font-family: var(--font-mono); font-size: 12px; padding: 7px 10px; border-radius: 3px;
+  }
+  #sidebar-search input::placeholder { color: var(--muted); }
+  #sidebar-search input:focus { outline: 2px solid var(--accent); outline-offset:1px; }
+  #plate-list-wrap { flex:1; overflow-y:auto; }
+  .sidebar-label {
+    font-family: var(--font-mono); font-size: 10px; text-transform: uppercase; letter-spacing: 1.5px; color: var(--muted);
+    padding: 14px 16px 6px;
+  }
+  .plate-link {
+    display:flex; align-items:center; gap:10px;
+    padding: 8px 16px; cursor:pointer; font-size: 13px;
+    border-left: 3px solid transparent;
+    transition: background .12s ease, border-color .12s ease;
+  }
+  .plate-link:hover { background: var(--panel); }
+  .plate-link.active { background: var(--panel); border-left-color: var(--accent); }
+  .plate-link.active .plate-title { color: var(--accent); }
+  .plate-link.disabled { color: #5a7186; cursor: default; }
+  .plate-link.disabled:hover { background: none; }
+  .plate-link.hide { display:none; }
+  .plate-num {
+    font-family: var(--font-mono); font-size: 11px; color: var(--muted);
+    width: 22px; text-align:right; flex-shrink:0;
+  }
+  .plate-link.active .plate-num { color: var(--accent); }
+  .plate-title { flex:1; line-height:1.3; color: var(--ink-dim); }
+
+  #content { flex:1; position:relative; min-width:0; background: var(--bg); overflow:auto; }
+  #mapFrame { position:absolute; inset:0; top:34px; width:100%; height:calc(100% - 34px); border:0; background:white; display:none; }
+
+  /* ---------- Home / atlas grid view ---------- */
+  #home-view { padding: 40px 44px; max-width: 1080px; margin: 0 auto; opacity:1; transition: opacity .18s ease; }
+  #home-view.hidden { display:none; }
+  .intro-eyebrow { font-family: var(--font-mono); font-size: 11px; letter-spacing: 2px; text-transform:uppercase; color: var(--accent); margin-bottom: 10px; }
+  .intro-title { font-family: var(--font-head); font-size: 34px; font-weight:700; text-transform:uppercase; margin: 0 0 12px; line-height:1.2; letter-spacing:.3px; }
+  .intro-meta { font-family: var(--font-body); font-size: 13px; color: var(--ink-dim); line-height:1.7; margin-bottom: 30px; max-width: 640px; }
+  .intro-meta b { color: var(--ink); }
+  .plates-heading {
+    font-family: var(--font-mono); font-size: 11px; text-transform:uppercase; letter-spacing:1.5px;
+    color: var(--muted); border-bottom: 1px solid var(--line); padding-bottom: 8px; margin: 0 0 18px;
+    display:flex; justify-content:space-between; align-items:center; gap:12px;
+  }
+  #home-search {
+    background: var(--panel-2); border: 1px solid var(--line); color: var(--ink);
+    font-family: var(--font-mono); font-size: 11.5px; padding: 6px 10px; border-radius: 3px; width: 200px;
+  }
+  #home-search::placeholder { color: var(--muted); }
+  .plate-grid { display:grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 16px; }
+  .plate-card {
+    position:relative; background: var(--panel); border: 1px solid var(--line); border-radius: 4px;
+    padding: 0; cursor:pointer; overflow:hidden;
+    transition: transform .15s ease, border-color .15s ease, box-shadow .15s ease;
+  }
+  .plate-card:hover { transform: translateY(-2px); border-color: var(--accent); box-shadow: 0 6px 18px rgba(0,0,0,0.35); }
+  .plate-card.disabled { cursor:default; opacity: 0.5; }
+  .plate-card.disabled:hover { transform:none; border-color: var(--line); box-shadow:none; }
+  .plate-card.hide { display:none; }
+  .plate-thumb { width:100%; height: 108px; display:block; background: var(--panel-2); }
+  .plate-card-body { padding: 12px 14px 14px; }
+  .plate-card-num { font-family: var(--font-mono); font-size: 10.5px; letter-spacing: 1.5px; color: var(--accent); margin-bottom: 6px; }
+  .plate-card.disabled .plate-card-num { color: var(--muted); }
+  .plate-card h4 { margin: 0 0 6px; font-family: var(--font-head); font-size: 16px; font-weight:700; text-transform:uppercase; letter-spacing:.2px; line-height:1.25; color: var(--ink); }
+  .plate-card p { margin:0; font-family: var(--font-body); font-size: 12px; color: var(--ink-dim); line-height:1.5; }
+  .plate-card .status-tag {
+    display:inline-block; margin-top:10px; font-family: var(--font-mono); font-size: 10px;
+    text-transform:uppercase; letter-spacing: 1px; padding: 2px 8px; border-radius: 2px; border: 1px solid;
+  }
+  .status-tag.ready { border-color:#4f8fa6; color:#8fc2d6; }
+  .status-tag.pending { border-color:#5a7186; color:#8098ac; }
+
+  /* corner registration ticks on cards */
+  .plate-card::before, .plate-card::after {
+    content:""; position:absolute; width:8px; height:8px; pointer-events:none; opacity:0; transition:opacity .15s ease;
+  }
+  .plate-card::before { top:4px; left:4px; border-top:1px solid var(--accent); border-left:1px solid var(--accent); }
+  .plate-card::after { bottom:4px; right:4px; border-bottom:1px solid var(--accent); border-right:1px solid var(--accent); }
+  .plate-card:hover::before, .plate-card:hover::after { opacity:1; }
+
+  /* ---------- Plate viewer top bar ---------- */
+  #plate-topbar {
+    display:none; align-items:center; gap:10px; height:34px; font-family: var(--font-mono); font-size: 11.5px;
+    padding: 0 14px; background: var(--paper); border-bottom: 1px solid var(--line); color: var(--ink-dim);
+    position:absolute; top:0; left:0; right:0; z-index:10;
+  }
+  #plate-topbar.show { display:flex; }
+  #plate-topbar a { cursor:pointer; color: var(--accent); text-decoration:none; letter-spacing:.5px; }
+  #plate-topbar a:hover { text-decoration:underline; }
+  #plate-topbar .sep { color: var(--line); }
+  #plate-topbar .nav-btn { background:none; border:1px solid var(--line); color:var(--ink-dim); font-family:var(--font-mono); font-size:12px; width:22px; height:22px; border-radius:2px; cursor:pointer; line-height:1; }
+  #plate-topbar .nav-btn:hover:not(:disabled) { border-color: var(--accent); color: var(--accent); }
+  #plate-topbar .nav-btn:disabled { opacity:.3; cursor:default; }
+  #plate-topbar .flex-spacer { flex:1; }
+
+  /* ---------- Mobile ---------- */
+  @media (max-width: 760px) {
+    #sidebar {
+      position:absolute; top:0; left:0; bottom:0; z-index: 900; width: 250px;
+      transform: translateX(-100%); transition: transform .2s ease;
+      box-shadow: 4px 0 20px rgba(0,0,0,0.4);
+    }
+    #sidebar.open { transform: translateX(0); }
+    #home-view { padding: 26px 18px; }
+    .intro-title { font-size: 24px; }
+    #about-panel { right: 12px; left: 12px; width:auto; }
+    .plates-heading { flex-direction:column; align-items:flex-start; gap:8px; }
+    #home-search { width:100%; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    #sidebar, .plate-card, #home-view { transition: none; }
+  }
+</style>
+</head>
+<body>
+<div id="app">
+  <header>
+    <div class="header-row">
+      <div>
+        <div class="site-brand">VaigaiGIS2026 // Atlas</div>
+        <h1 id="home-link">Vaigai Valley GIS Archaeological Study</h1>
+        <p class="subtitle">Settlement Dynamics and Environmental Determinants of the Vaigai Valley — Interactive Map Series</p>
+      </div>
+      <div class="header-actions">
+        <button class="pill-btn" id="menu-toggle">☰ Plates</button>
+        <button class="pill-btn" id="about-toggle">About / Credits</button>
+      </div>
+    </div>
+  </header>
+
+  <div id="about-panel">
+    <button class="close-btn" id="about-close">✕</button>
+    <h3>About this study</h3>
+    <div class="about-row">
+      <b>Dissertation</b>
+      "Settlement Dynamics and Environmental Determinants of the Vaigai Valley: A GIS Based Archaeological Study"
+    </div>
+    <div class="about-row">
+      <b>Author</b>
+      S. Sriram
+    </div>
+    <div class="about-row">
+      <b>Institution</b>
+      Post Graduate Diploma in Archaeology (PGDA) (2024-2026), Tamil Nadu Institute of Archaeology and Museology
+    </div>
+    <div class="about-row">
+      <b>Data Sources</b>
+      Site Data: Balamurugan, P. (2016), "Historical Archaeology of the Vaigai Valley," PhD Thesis, Pondicherry University · Elevation: SRTM 30m (NASA/USGS) · River Network: HydroRIVERS (WWF)
+    </div>
+    <div class="about-row">
+      <b>This Atlas</b>
+      22 thematic map plates exploring site distribution and its environmental determinants across the Vaigai basin. Built for personal, non-commercial educational use.
+    </div>
+    <div class="about-row">
+      <b>Research Advisors &amp; Guidance</b>
+      Prof. K. Rajan — Pondicherry University (Retd.), Research Advisor<br>
+      Dr. R. Sivanandham — Joint Director (Rtd.)<br>
+      Dr. V.P. Yathees Kumar — Joint Director (Incharge)<br>
+      K.Bakialakshmi, Coordinator / Assistant Director (Tech) <br>
+      M. Suresh — Archaeological Officer, Research Supervisor / Guide<br>
+      Muthu Shankar — French Institute of Pondicherry, Special Guidance<br>
+      R. Ajay Kumar — Archaeological Officer, Special Guidance
+    </div>
+    <div class="about-row">
+      <b>Department</b>
+      Tamil Nadu State Department of Archaeology (TNSDA)
+    </div>
+  </div>
+  <div id="main">
+    <nav id="sidebar">
+      <div id="sidebar-search">
+        <input type="text" id="sidebar-filter" placeholder="Filter plates...">
+      </div>
+      <div id="plate-list-wrap">
+        <div class="sidebar-label">22 Plates</div>
+        <div id="plate-list"></div>
+      </div>
+    </nav>
+    <div id="content">
+      <div id="plate-topbar">
+        <a id="crumb-home">ATLAS HOME</a>
+        <span class="sep">/</span>
+        <span id="crumb-current"></span>
+        <span class="flex-spacer"></span>
+        <button class="nav-btn" id="prev-plate" title="Previous plate">‹</button>
+        <button class="nav-btn" id="next-plate" title="Next plate">›</button>
+      </div>
+      <div id="home-view">
+        <div class="intro-eyebrow">A GIS-Based Archaeological Study</div>
+        <h2 class="intro-title">Vaigai Valley GIS Archaeological Study</h2>
+        <p class="intro-meta">
+          <b>"Settlement Dynamics and Environmental Determinants of the Vaigai Valley: A GIS Based Archaeological Study"</b><br>
+          S. Sriram · Post Graduate Diploma in Archaeology (PGDA), Tamil Nadu State Department of Archaeology (TNSDA)<br><br>
+          This atlas collects 22 interactive map plates built from site survey data, SRTM elevation, hydrology and administrative boundary layers. Select a plate to explore it — each is its own interactive map with filters, layer toggles and site-level detail. Use the arrow keys to page through plates once you're viewing one.
+        </p>
+        <h3 class="plates-heading">
+          <span>The Plates</span>
+          <input type="text" id="home-search" placeholder="Filter plates...">
+        </h3>
+        <div class="plate-grid" id="plate-grid"></div>
+      </div>
+      <iframe id="mapFrame" title="Map plate viewer"></iframe>
+    </div>
+  </div>
+</div>
+
+<script>
+// ---------------------------------------------------------------
+// PLATE REGISTRY
+// Each entry: n, slug, title, desc, file, ready, v.
+// TO ADD A MAP: drop its HTML file into /maps/, then fill in
+// title / desc / file / ready:true for that plate below.
+// TO UPDATE AN EXISTING MAP: replace the file in /maps/ and bump
+// that plate's "v" number by 1. This changes the iframe's URL
+// (file + ?v=N) so browsers/CDNs fetch the new file instead of
+// serving a cached copy of the old one under the same filename.
+// ---------------------------------------------------------------
+const PLATES = [
+  { n: 1,  slug: 'site-distribution', title: 'Archaeological Site Distribution', desc: 'Settlement locations by cultural period across the Vaigai basin, with elevation, boundary, river and district reference layers.', file: 'maps/plate-01-site-distribution.html', ready: true, v: 2 },
+  { n: 2,  slug: 'contour-elevation', title: 'Contour & Elevation Zones', desc: 'Terrain contours and elevation banding across the Vaigai basin, providing topographic context for site placement.', file: 'maps/plate-02-contour-elevation.html', ready: true, v: 1 },
+  { n: 3,  slug: 'plate-03', title: 'Plate 03', desc: 'Awaiting map file.', file: null, ready: false, v: 1 },
+  { n: 4,  slug: 'plate-04', title: 'Plate 04', desc: 'Awaiting map file.', file: null, ready: false, v: 1 },
+  { n: 5,  slug: 'dem-hypsometric', title: 'DEM & Hypsometric Analysis', desc: 'Elevation zones from the 30m DEM with the Vaigai river and sub-tributary network, filterable by cultural group.', file: 'maps/plate-05-dem-hypsometric.html', ready: true, v: 2 },
+  { n: 6,  slug: 'plate-06', title: 'Plate 06', desc: 'Awaiting map file.', file: null, ready: false, v: 1 },
+  { n: 7,  slug: 'plate-07', title: 'Plate 07', desc: 'Awaiting map file.', file: null, ready: false, v: 1 },
+  { n: 8,  slug: 'plate-08', title: 'Plate 08', desc: 'Awaiting map file.', file: null, ready: false, v: 1 },
+  { n: 9,  slug: 'plate-09', title: 'Plate 09', desc: 'Awaiting map file.', file: null, ready: false, v: 1 },
+  { n: 10, slug: 'plate-10', title: 'Plate 10', desc: 'Awaiting map file.', file: null, ready: false, v: 1 },
+  { n: 11, slug: 'plate-11', title: 'Plate 11', desc: 'Awaiting map file.', file: null, ready: false, v: 1 },
+  { n: 12, slug: 'plate-12', title: 'Plate 12', desc: 'Awaiting map file.', file: null, ready: false, v: 1 },
+  { n: 13, slug: 'plate-13', title: 'Plate 13', desc: 'Awaiting map file.', file: null, ready: false, v: 1 },
+  { n: 14, slug: 'plate-14', title: 'Plate 14', desc: 'Awaiting map file.', file: null, ready: false, v: 1 },
+  { n: 15, slug: 'plate-15', title: 'Plate 15', desc: 'Awaiting map file.', file: null, ready: false, v: 1 },
+  { n: 16, slug: 'plate-16', title: 'Plate 16', desc: 'Awaiting map file.', file: null, ready: false, v: 1 },
+  { n: 17, slug: 'plate-17', title: 'Plate 17', desc: 'Awaiting map file.', file: null, ready: false, v: 1 },
+  { n: 18, slug: 'plate-18', title: 'Plate 18', desc: 'Awaiting map file.', file: null, ready: false, v: 1 },
+  { n: 19, slug: 'plate-19', title: 'Plate 19', desc: 'Awaiting map file.', file: null, ready: false, v: 1 },
+  { n: 20, slug: 'plate-20', title: 'Plate 20', desc: 'Awaiting map file.', file: null, ready: false, v: 1 },
+  { n: 21, slug: 'plate-21', title: 'Plate 21', desc: 'Awaiting map file.', file: null, ready: false, v: 1 },
+  { n: 22, slug: 'plate-22', title: 'Plate 22', desc: 'Awaiting map file.', file: null, ready: false, v: 1 },
+];
+
+function pad(n) { return String(n).padStart(2, '0'); }
+
+// ---------------------------------------------------------------
+// Generative thumbnail: a small "survey sheet" preview (graticule +
+// scattered site dots) so every plate has a visual card even before
+// a real screenshot exists. Ready plates get the amber/teal palette,
+// pending ones render muted grayscale.
+// ---------------------------------------------------------------
+function makeThumb(n, ready) {
+  const w = 300, h = 140;
+  let seed = n * 9301 + 49297;
+  function rand() { seed = (seed * 9301 + 49297) % 233280; return seed / 233280; }
+  const dotColor = ready ? '#c99b53' : '#3a5674';
+  const lineColor = ready ? 'rgba(79,143,166,0.35)' : 'rgba(90,113,134,0.25)';
+  let dots = '';
+  const count = 10 + Math.floor(rand() * 8);
+  for (let i = 0; i < count; i++) {
+    const x = 10 + rand() * (w - 20);
+    const y = 10 + rand() * (h - 20);
+    const r = ready ? (1.6 + rand() * 1.8) : (1.2 + rand() * 1.2);
+    dots += `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${r.toFixed(1)}" fill="${dotColor}" opacity="${ready ? 0.9 : 0.5}"/>`;
+  }
+  let grid = '';
+  for (let x = 0; x <= w; x += 30) grid += `<line x1="${x}" y1="0" x2="${x}" y2="${h}" stroke="${lineColor}" stroke-width="1"/>`;
+  for (let y = 0; y <= h; y += 30) grid += `<line x1="0" y1="${y}" x2="${w}" y2="${y}" stroke="${lineColor}" stroke-width="1"/>`;
+  const bg = ready ? '#0f2740' : '#0d1f33';
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${w} ${h}"><rect width="${w}" height="${h}" fill="${bg}"/>${grid}${dots}</svg>`;
+  return 'data:image/svg+xml;base64,' + btoa(svg);
+}
+
+const sidebarList = document.getElementById('plate-list');
+const grid = document.getElementById('plate-grid');
+const mapFrame = document.getElementById('mapFrame');
+const homeView = document.getElementById('home-view');
+const topbar = document.getElementById('plate-topbar');
+const crumbCurrent = document.getElementById('crumb-current');
+const prevBtn = document.getElementById('prev-plate');
+const nextBtn = document.getElementById('next-plate');
+
+// Build sidebar
+PLATES.forEach(p => {
+  const el = document.createElement('div');
+  el.className = 'plate-link' + (p.ready ? '' : ' disabled');
+  el.dataset.slug = p.slug;
+  el.dataset.search = (p.title + ' ' + p.desc).toLowerCase();
+  el.innerHTML = `<span class="plate-num">${pad(p.n)}</span><span class="plate-title">${p.title}</span>`;
+  if (p.ready) {
+    el.addEventListener('click', () => { location.hash = p.slug; closeMobileSidebar(); });
+  }
+  sidebarList.appendChild(el);
+});
+
+// Build home grid
+PLATES.forEach(p => {
+  const card = document.createElement('div');
+  card.className = 'plate-card' + (p.ready ? '' : ' disabled');
+  card.dataset.search = (p.title + ' ' + p.desc).toLowerCase();
+  card.innerHTML = `
+    <img class="plate-thumb" src="${makeThumb(p.n, p.ready)}" alt="">
+    <div class="plate-card-body">
+      <div class="plate-card-num">SHEET ${pad(p.n)}/22</div>
+      <h4>${p.title}</h4>
+      <p>${p.desc}</p>
+      <span class="status-tag ${p.ready ? 'ready' : 'pending'}">${p.ready ? 'Available' : 'Coming soon'}</span>
+    </div>
+  `;
+  if (p.ready) {
+    card.addEventListener('click', () => { location.hash = p.slug; });
+  }
+  grid.appendChild(card);
+});
+
+function showHome() {
+  homeView.classList.remove('hidden');
+  mapFrame.style.display = 'none';
+  mapFrame.src = '';
+  topbar.classList.remove('show');
+  document.querySelectorAll('.plate-link').forEach(el => el.classList.remove('active'));
+}
+
+function showPlate(plate) {
+  homeView.classList.add('hidden');
+  mapFrame.style.display = 'block';
+  const src = plate.file + '?v=' + (plate.v || 1);
+  if (mapFrame.getAttribute('data-current') !== src) {
+    mapFrame.src = src;
+    mapFrame.setAttribute('data-current', src);
+  }
+  topbar.classList.add('show');
+  crumbCurrent.textContent = `SHEET ${pad(plate.n)}/22 — ${plate.title.toUpperCase()}`;
+  document.querySelectorAll('.plate-link').forEach(el => {
+    el.classList.toggle('active', el.dataset.slug === plate.slug);
+  });
+  const readyPlates = PLATES.filter(p => p.ready);
+  const idx = readyPlates.findIndex(p => p.slug === plate.slug);
+  prevBtn.disabled = idx <= 0;
+  nextBtn.disabled = idx === -1 || idx >= readyPlates.length - 1;
+  prevBtn.onclick = () => { if (idx > 0) location.hash = readyPlates[idx - 1].slug; };
+  nextBtn.onclick = () => { if (idx < readyPlates.length - 1) location.hash = readyPlates[idx + 1].slug; };
+}
+
+function route() {
+  const slug = location.hash.replace('#', '');
+  const plate = PLATES.find(p => p.slug === slug && p.ready);
+  if (plate) showPlate(plate); else { if (slug) location.hash = ''; showHome(); }
+}
+window.addEventListener('hashchange', route);
+route();
+
+document.getElementById('home-link').addEventListener('click', () => { location.hash = ''; });
+document.getElementById('crumb-home').addEventListener('click', () => { location.hash = ''; });
+
+// Keyboard paging between plates (ignored while typing in a filter box)
+document.addEventListener('keydown', (e) => {
+  const tag = document.activeElement.tagName;
+  if (tag === 'INPUT' || tag === 'TEXTAREA') return;
+  if (e.key === 'ArrowRight' && !nextBtn.disabled && topbar.classList.contains('show')) nextBtn.click();
+  if (e.key === 'ArrowLeft' && !prevBtn.disabled && topbar.classList.contains('show')) prevBtn.click();
+});
+
+// Live filter (sidebar + home grid stay in sync)
+function applyFilter(term) {
+  term = term.trim().toLowerCase();
+  document.querySelectorAll('.plate-link').forEach(el => {
+    el.classList.toggle('hide', term && !el.dataset.search.includes(term));
+  });
+  document.querySelectorAll('.plate-card').forEach(el => {
+    el.classList.toggle('hide', term && !el.dataset.search.includes(term));
+  });
+}
+const sidebarFilter = document.getElementById('sidebar-filter');
+const homeSearch = document.getElementById('home-search');
+sidebarFilter.addEventListener('input', (e) => { homeSearch.value = e.target.value; applyFilter(e.target.value); });
+homeSearch.addEventListener('input', (e) => { sidebarFilter.value = e.target.value; applyFilter(e.target.value); });
+
+// About panel
+document.getElementById('about-toggle').addEventListener('click', () => {
+  document.getElementById('about-panel').classList.toggle('open');
+});
+document.getElementById('about-close').addEventListener('click', () => {
+  document.getElementById('about-panel').classList.remove('open');
+});
+
+// Mobile sidebar
+const sidebarEl = document.getElementById('sidebar');
+document.getElementById('menu-toggle').addEventListener('click', () => {
+  sidebarEl.classList.toggle('open');
+});
+function closeMobileSidebar() {
+  if (window.innerWidth <= 760) sidebarEl.classList.remove('open');
+}
+</script>
+</body>
+</html>
