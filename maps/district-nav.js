@@ -58,75 +58,103 @@
       });
     });
 
-    // ---------- Inject CSS (scoped with dn- prefix) ----------
+    // ---------- Inject CSS (scoped with dn- prefix, inline embedded layout) ----------
     var style = document.createElement("style");
     style.textContent = [
-      ".dn-tab{position:fixed;top:16px;right:16px;z-index:1200;",
-      "background:#1a5fb4;color:#fff;border:none;border-radius:6px;",
-      "padding:10px 14px;font-family:'Georgia','Times New Roman',serif;",
-      "font-size:14px;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.25);}",
-      ".dn-tab:hover{background:#164a8f;}",
-      ".dn-panel{position:fixed;top:0;right:-340px;width:320px;height:100%;",
-      "background:#fff;z-index:1300;box-shadow:-2px 0 10px rgba(0,0,0,.25);",
-      "transition:right .25s ease;display:flex;flex-direction:column;",
-      "font-family:'Georgia','Times New Roman',serif;color:#1c1c1c;}",
-      ".dn-panel.dn-open{right:0;}",
-      ".dn-header{padding:14px 16px;border-bottom:1px solid #e5e2da;",
-      "display:flex;align-items:center;justify-content:space-between;}",
-      ".dn-header h3{margin:0;font-size:16px;}",
-      ".dn-close{background:none;border:none;font-size:20px;cursor:pointer;",
-      "color:#6b6b6b;line-height:1;}",
-      ".dn-search{margin:10px 16px;padding:8px 10px;border:1px solid #d8d5cc;",
-      "border-radius:4px;font-family:inherit;font-size:13px;width:calc(100% - 32px);}",
-      ".dn-body{overflow-y:auto;flex:1;padding:0 8px 16px;}",
-      ".dn-district{margin:6px 8px;}",
+      ".dn-embed{margin:10px 0 14px;border:1px solid #d8d5cc;border-radius:6px;",
+      "overflow:hidden;font-family:'Georgia','Times New Roman',serif;",
+      "color:#1c1c1c;background:#fff;}",
+      ".dn-toggle{width:100%;text-align:left;background:#f7f5f0;border:none;",
+      "padding:10px 12px;cursor:pointer;font-family:inherit;font-size:14px;",
+      "font-weight:bold;color:#1c1c1c;display:flex;justify-content:space-between;",
+      "align-items:center;}",
+      ".dn-toggle:hover{background:#efece2;}",
+      ".dn-toggle .dn-caret{transition:transform .2s ease;font-size:11px;color:#6b6b6b;}",
+      ".dn-embed.dn-open .dn-caret{transform:rotate(180deg);}",
+      ".dn-content{max-height:0;overflow:hidden;transition:max-height .25s ease;}",
+      ".dn-embed.dn-open .dn-content{max-height:380px;}",
+      ".dn-search{margin:10px 10px 6px;padding:7px 9px;border:1px solid #d8d5cc;",
+      "border-radius:4px;font-family:inherit;font-size:13px;",
+      "width:calc(100% - 22px);box-sizing:border-box;}",
+      ".dn-body{overflow-y:auto;max-height:280px;padding:0 6px 10px;}",
+      ".dn-district{margin:4px 4px;}",
       ".dn-district-head{width:100%;text-align:left;background:#f7f5f0;",
-      "border:none;border-radius:4px;padding:8px 10px;cursor:pointer;",
-      "font-family:inherit;font-size:14px;font-weight:bold;color:#1c1c1c;",
+      "border:none;border-radius:4px;padding:7px 9px;cursor:pointer;",
+      "font-family:inherit;font-size:13px;font-weight:bold;color:#1c1c1c;",
       "display:flex;justify-content:space-between;align-items:center;}",
       ".dn-district-head:hover{background:#efece2;}",
-      ".dn-count{color:#6b6b6b;font-weight:normal;font-size:12px;}",
+      ".dn-count{color:#6b6b6b;font-weight:normal;font-size:11px;}",
       ".dn-sites{max-height:0;overflow:hidden;transition:max-height .2s ease;}",
       ".dn-sites.dn-expanded{max-height:1000px;}",
       ".dn-site{display:block;width:100%;text-align:left;background:none;",
-      "border:none;border-bottom:1px solid #f0eee7;padding:7px 10px 7px 18px;",
-      "cursor:pointer;font-family:inherit;font-size:13px;color:#1a5fb4;}",
+      "border:none;border-bottom:1px solid #f0eee7;padding:6px 8px 6px 16px;",
+      "cursor:pointer;font-family:inherit;font-size:12.5px;color:#1a5fb4;}",
       ".dn-site:hover{background:#f7f5f0;text-decoration:underline;}",
-      ".dn-empty{padding:16px;color:#6b6b6b;font-size:13px;}",
-      "@media (max-width:600px){.dn-panel{width:85%;right:-100%;}}"
+      ".dn-empty{padding:12px;color:#6b6b6b;font-size:12.5px;}"
     ].join("");
     document.head.appendChild(style);
 
-    // ---------- Build DOM ----------
-    var tab = document.createElement("button");
-    tab.className = "dn-tab";
-    tab.type = "button";
-    tab.textContent = "Districts";
-    document.body.appendChild(tab);
+    // ---------- Diacritic-insensitive matching ----------
+    // Strips combining diacritical marks (macrons, dots-below, underlines,
+    // etc.) via Unicode NFD decomposition, so "Kovilpatti" matches
+    // "Kōvilpaṭṭi", "Ramanathapuram" matches itself regardless of any
+    // accenting, etc. Falls back gracefully on lowercasing alone if a
+    // very old browser lacks String.prototype.normalize.
+    function normalizeText(str) {
+      var s = String(str || "").toLowerCase();
+      if (typeof s.normalize === "function") {
+        s = s.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+      }
+      return s;
+    }
 
-    var panel = document.createElement("div");
-    panel.className = "dn-panel";
-    panel.innerHTML =
-      '<div class="dn-header"><h3>Browse by District</h3>' +
-      '<button type="button" class="dn-close" aria-label="Close">&times;</button></div>' +
+    // ---------- Find where to embed ----------
+    // Preferred: right after the "N sites shown" stat box, so the block
+    // sits inline in the sidebar's normal scroll flow (scrolls with it,
+    // not fixed/floating). Falls back gracefully if a future plate
+    // doesn't use this exact markup.
+    var mountAfter = null;
+    var countEl = document.getElementById("visible-count");
+    if (countEl) {
+      mountAfter = countEl.closest ? countEl.closest(".stat-box") : null;
+      if (!mountAfter) mountAfter = countEl.parentElement;
+    }
+
+    // ---------- Build DOM (inline embedded accordion, not a floating overlay) ----------
+    var embed = document.createElement("div");
+    embed.className = "dn-embed";
+    embed.innerHTML =
+      '<button type="button" class="dn-toggle">' +
+      '<span>Browse by District</span><span class="dn-caret">&#9662;</span></button>' +
+      '<div class="dn-content">' +
       '<input type="text" class="dn-search" placeholder="Search district or site...">' +
-      '<div class="dn-body"></div>';
-    document.body.appendChild(panel);
+      '<div class="dn-body"></div>' +
+      '</div>';
 
-    var body = panel.querySelector(".dn-body");
-    var searchInput = panel.querySelector(".dn-search");
-    var closeBtn = panel.querySelector(".dn-close");
+    if (mountAfter && mountAfter.parentNode) {
+      mountAfter.parentNode.insertBefore(embed, mountAfter.nextSibling);
+    } else if (document.getElementById("sidebar")) {
+      var sidebarEl = document.getElementById("sidebar");
+      sidebarEl.insertBefore(embed, sidebarEl.firstChild);
+    } else {
+      console.warn("[district-nav] No stat-box/sidebar mount point found — appending to body top.");
+      document.body.insertBefore(embed, document.body.firstChild);
+    }
+
+    var toggleBtn = embed.querySelector(".dn-toggle");
+    var body = embed.querySelector(".dn-body");
+    var searchInput = embed.querySelector(".dn-search");
 
     function renderList(filterText) {
-      var q = (filterText || "").trim().toLowerCase();
+      var q = normalizeText(filterText).trim();
       body.innerHTML = "";
       var anyMatch = false;
 
       districtNames.forEach(function (d) {
         var sites = byDistrict[d];
-        var districtMatches = d.toLowerCase().indexOf(q) !== -1;
+        var districtMatches = normalizeText(d).indexOf(q) !== -1;
         var matchingSites = q === "" ? sites : sites.filter(function (s) {
-          return districtMatches || String(s.name).toLowerCase().indexOf(q) !== -1;
+          return districtMatches || normalizeText(s.name).indexOf(q) !== -1;
         });
         if (q !== "" && matchingSites.length === 0) return;
         anyMatch = true;
@@ -187,7 +215,8 @@
         showDetail(site);
       }
 
-      // Auto-close panel on mobile-sized viewports for a clear view of the map
+      // Collapse the embedded panel on mobile-sized viewports after a
+      // selection, for a clearer view of the map.
       if (window.innerWidth <= 600) {
         closePanel();
       }
@@ -202,18 +231,17 @@
       }, 900);
     }
 
-    // ---------- Open/close ----------
+    // ---------- Open/close (inline accordion, not an overlay) ----------
     function openPanel() {
-      panel.classList.add("dn-open");
+      embed.classList.add("dn-open");
     }
     function closePanel() {
-      panel.classList.remove("dn-open");
+      embed.classList.remove("dn-open");
     }
 
-    tab.addEventListener("click", function () {
-      panel.classList.contains("dn-open") ? closePanel() : openPanel();
+    toggleBtn.addEventListener("click", function () {
+      embed.classList.contains("dn-open") ? closePanel() : openPanel();
     });
-    closeBtn.addEventListener("click", closePanel);
     searchInput.addEventListener("input", function (e) {
       renderList(e.target.value);
     });
