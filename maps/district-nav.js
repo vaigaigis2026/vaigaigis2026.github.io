@@ -7,36 +7,40 @@
  *      <script src="shared/district-nav.js"></script>
  * 2. That's it — no HTML markup needed. It builds its own UI.
  *
- * REQUIRED GLOBALS (must exist by the time this script runs)
+ * REQUIRED (must be declared, in any of `var`/`let`/`const`/function form,
+ * at the top level of a preceding <script> on the same page — NOT inside
+ * a function, module, or IIFE — so this script can see them as globals)
  * --------------------------------------------------------------
- *   window.map      — a Leaflet map instance
- *   window.markers  — object keyed by site.id -> { marker, site }
- *   window.SITE_DATA — array of site objects, each with at least:
- *                      { id, name, lat, lng, district }
- * OPTIONAL GLOBALS
+ *   map        — a Leaflet map instance
+ *   markers    — object keyed by site.id -> { marker, site }
+ *   SITE_DATA  — array of site objects, each with at least:
+ *                { id, name, lat, lng, district }
+ * OPTIONAL
  * --------------------------------------------------------------
- *   window.showDetail(site) — if present, called on site selection
- *                              to populate a detail panel, matching
- *                              the same behavior as clicking a marker.
+ *   showDetail(site) — if present, called on site selection to
+ *                       populate a detail panel, matching the same
+ *                       behavior as clicking a marker.
  *
  * If SITE_DATA / markers / map aren't found, the panel silently
- * does not initialize (safe no-op) rather than throwing errors.
+ * does not initialize (safe no-op, logged as a console warning)
+ * rather than throwing errors.
  */
 (function () {
   "use strict";
 
   function init() {
-    if (typeof window.SITE_DATA === "undefined" ||
-        typeof window.markers === "undefined" ||
-        typeof window.map === "undefined") {
+    // NOTE: we deliberately check bare identifiers (not window.X) because
+    // top-level `const`/`let` declarations in a classic <script> do NOT
+    // attach to `window` — only `var` and function declarations do. Bare
+    // identifiers are still safe to `typeof`-check even if undeclared.
+    if (typeof SITE_DATA === "undefined" ||
+        typeof markers === "undefined" ||
+        typeof map === "undefined") {
       console.warn("[district-nav] Required globals (SITE_DATA, markers, map) not found — skipping.");
       return;
     }
 
-    var SITE_DATA = window.SITE_DATA;
-    var markers = window.markers;
-    var map = window.map;
-    var hasShowDetail = typeof window.showDetail === "function";
+    var hasShowDetail = typeof showDetail === "function";
 
     // ---------- Build district -> sites grouping ----------
     var byDistrict = {};
@@ -180,7 +184,7 @@
       }
 
       if (hasShowDetail) {
-        window.showDetail(site);
+        showDetail(site);
       }
 
       // Auto-close panel on mobile-sized viewports for a clear view of the map
