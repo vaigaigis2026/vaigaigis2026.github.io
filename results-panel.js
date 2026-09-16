@@ -139,7 +139,7 @@
 
     if (dataset.title) {
       p.push('<text x="' + (width / 2) + '" y="' + (titleSize + 10) + '" text-anchor="middle" font-size="' + titleSize +
-        '" font-weight="bold" fill="' + COL_INK + '">' + svgTextWithSuperscript(dataset.title, titleSize) + '</text>');
+        '" font-weight="bold" fill="' + COL_INK + '">' + svgTextWithSuperscript(String(dataset.title).toUpperCase(), titleSize) + '</text>');
     }
 
     var ticks = [];
@@ -242,7 +242,7 @@
 
     if (dataset.title) {
       p.push('<text x="' + (width / 2) + '" y="' + (titleSize + 10) + '" text-anchor="middle" font-size="' + titleSize +
-        '" font-weight="bold" fill="' + COL_INK + '">' + svgTextWithSuperscript(dataset.title, titleSize) + '</text>');
+        '" font-weight="bold" fill="' + COL_INK + '">' + svgTextWithSuperscript(String(dataset.title).toUpperCase(), titleSize) + '</text>');
     }
 
     var ticks = [];
