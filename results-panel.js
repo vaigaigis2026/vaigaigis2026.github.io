@@ -50,7 +50,7 @@
     return s.length > maxLen ? s.slice(0, maxLen - 1) + "\u2026" : s;
   }
   function niceAxis(maxValue) {
-    if (maxValue <= 0) return { max: 10, step: 2 };
+    if (maxValue <= 0) return { min: 0, max: 10, step: 2 };
     var roughStep = maxValue / 5;
     var magnitude = Math.pow(10, Math.floor(Math.log10(roughStep)));
     var normalized = roughStep / magnitude;
@@ -62,7 +62,29 @@
     var step = niceNormalized * magnitude;
     var max = Math.ceil(maxValue / step) * step;
     if (max === maxValue) max += step;
-    return { max: max, step: step };
+    return { min: 0, max: max, step: step };
+  }
+  // Like niceAxis, but handles a negative minimum (e.g. a "difference"
+  // value below zero), so bars can extend both above and below a zero
+  // baseline instead of clipping negative values to zero-height.
+  function niceAxisRange(minValue, maxValue) {
+    var lo = Math.min(0, minValue);
+    var hi = Math.max(0, maxValue);
+    if (lo === 0 && hi === 0) return { min: 0, max: 10, step: 2 };
+    var range = hi - lo;
+    var roughStep = range / 5;
+    var magnitude = Math.pow(10, Math.floor(Math.log10(roughStep)));
+    var normalized = roughStep / magnitude;
+    var niceNormalized;
+    if (normalized <= 1) niceNormalized = 1;
+    else if (normalized <= 2) niceNormalized = 2;
+    else if (normalized <= 5) niceNormalized = 5;
+    else niceNormalized = 10;
+    var step = niceNormalized * magnitude;
+    var niceMax = Math.ceil(hi / step) * step;
+    var niceMin = Math.floor(lo / step) * step;
+    if (niceMax === hi && hi !== 0) niceMax += step;
+    return { min: niceMin, max: niceMax, step: step };
   }
 
   // ---------- Single-series column chart ----------
@@ -71,7 +93,8 @@
     var rows = dataset.rows || [];
     var n = rows.length || 1;
     var maxCount = rows.reduce(function (m, r) { return Math.max(m, r.count || 0); }, 0);
-    var axis = niceAxis(maxCount);
+    var minCount = rows.reduce(function (m, r) { return Math.min(m, r.count || 0); }, 0);
+    var axis = niceAxisRange(minCount, maxCount);
 
     var width = opts.width || 620;
     var marginLeft = opts.marginLeft || 50;
@@ -106,7 +129,8 @@
     var barSlot = plotW / n;
     var barWidth = Math.min(barSlot * 0.55, opts.maxBarWidth || 46);
 
-    function yFor(value) { return marginTop + plotH - (value / axis.max) * plotH; }
+    function yFor(value) { return marginTop + plotH - ((value - axis.min) / (axis.max - axis.min)) * plotH; }
+    var zeroY = yFor(0);
 
     var p = [];
     p.push('<svg viewBox="0 0 ' + width + ' ' + height + '" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;display:block;" font-family="Arial, Helvetica, sans-serif">');
@@ -118,7 +142,7 @@
     }
 
     var ticks = [];
-    for (var v = 0; v <= axis.max; v += axis.step) ticks.push(v);
+    for (var v = axis.min; v <= axis.max + 1e-9; v += axis.step) ticks.push(Math.round(v * 1000) / 1000);
     ticks.forEach(function (t) {
       var y = yFor(t);
       p.push('<line x1="' + marginLeft + '" y1="' + y + '" x2="' + (width - marginRight) + '" y2="' + y + '" stroke="' + COL_LINE_SOFT + '" stroke-width="1"/>');
@@ -126,16 +150,19 @@
     });
 
     p.push('<line x1="' + marginLeft + '" y1="' + marginTop + '" x2="' + marginLeft + '" y2="' + (marginTop + plotH) + '" stroke="' + COL_LINE + '" stroke-width="1"/>');
-    p.push('<line x1="' + marginLeft + '" y1="' + (marginTop + plotH) + '" x2="' + (width - marginRight) + '" y2="' + (marginTop + plotH) + '" stroke="' + COL_LINE + '" stroke-width="1"/>');
+    p.push('<line x1="' + marginLeft + '" y1="' + zeroY.toFixed(1) + '" x2="' + (width - marginRight) + '" y2="' + zeroY.toFixed(1) + '" stroke="' + COL_LINE + '" stroke-width="1"/>');
 
     rows.forEach(function (r, i) {
       var slotX = marginLeft + i * barSlot;
       var barX = slotX + (barSlot - barWidth) / 2;
-      var barY = yFor(r.count || 0);
-      var barH = (marginTop + plotH) - barY;
-      p.push('<rect x="' + barX.toFixed(1) + '" y="' + barY.toFixed(1) + '" width="' + barWidth.toFixed(1) +
-        '" height="' + Math.max(barH, 0).toFixed(1) + '" fill="' + COL_ACCENT + '"/>');
-      p.push('<text x="' + (slotX + barSlot / 2).toFixed(1) + '" y="' + (barY - 5).toFixed(1) +
+      var val = r.count || 0;
+      var barYval = yFor(val);
+      var barTop = Math.min(barYval, zeroY);
+      var barH = Math.abs(zeroY - barYval);
+      p.push('<rect x="' + barX.toFixed(1) + '" y="' + barTop.toFixed(1) + '" width="' + barWidth.toFixed(1) +
+        '" height="' + barH.toFixed(1) + '" fill="' + COL_ACCENT + '"/>');
+      var valLabelY = val >= 0 ? barYval - 5 : barYval + valueSize + 6;
+      p.push('<text x="' + (slotX + barSlot / 2).toFixed(1) + '" y="' + valLabelY.toFixed(1) +
         '" text-anchor="middle" font-size="' + valueSize + '" fill="' + COL_INK + '">' + (r.count != null ? r.count : "") + '</text>');
 
       var labelX = slotX + barSlot / 2;
@@ -382,7 +409,8 @@
       card.innerHTML =
         '<div class="rp-card-title">' + escapeXml(dataset.title || "Results") + '</div>' +
         '<div class="rp-chart-wrap"></div>' +
-        '<div class="rp-caption">Total: ' + total + ' ' + unitLabel + '</div>';
+        (dataset.showTotal === false ? '' :
+          '<div class="rp-caption">Total: ' + total + ' ' + unitLabel + '</div>');
       container.appendChild(card);
 
       var chartWrap = card.querySelector(".rp-chart-wrap");
