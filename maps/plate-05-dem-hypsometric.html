@@ -337,5 +337,58 @@ document.getElementById('toggle-district').addEventListener('change', (e) => {
 });
 </script>
 <script src="district-nav.js"></script>
+
+<script>
+window.RESULTS_DATA = [
+  {
+    title: "Basin and Archaeological Site Distribution Across Elevation Zones",
+    titleSize: 15,
+    xAxisLabel: "Elevation Ranges with Zones",
+    yAxisLabel: "Values",
+    unit: "sites",
+    total: 338,
+    categories: ["-16 to 0 (1)", "0 - 25 (2)", "25 - 100 (3)", "100 - 500 (4)", "500 - 1600 (5)", "1600 - 2649 (6)"],
+    series: [
+      { name: "Basin %", data: [0.09, 14.59, 20.32, 50.26, 12.44, 2.30] },
+      { name: "Sites (n)", data: [0, 21, 69, 226, 21, 1] },
+      { name: "Site %", data: [0, 6.21, 20.41, 66.86, 6.21, 0.30] }
+    ]
+  },
+  {
+    title: "Overall Site Elevation Summary",
+    titleSize: 15,
+    xAxisLabel: "Parameters",
+    yAxisLabel: "Elevation (m)",
+    unit: "m",
+    showTotal: false,
+    rows: [
+      { label: "Mean Site Elevation", count: 235.58 },
+      { label: "Maximum Site Elevation", count: 1732.00 },
+      { label: "Standard Deviation", count: 215.49 },
+      { label: "Basin Mean Elevation (H_mean)", count: 289.28 },
+      { label: "Site\u2013Basin Mean Difference", count: -53.70 }
+    ]
+  },
+  {
+    title: "Mean Elevation by Cultural Period",
+    titleSize: 15,
+    xAxisLabel: "Cultural Period with Sites Count",
+    yAxisLabel: "Elevation (m)",
+    unit: "m",
+    showTotal: false,
+    categories: [
+      "Pre-Iron Age (21 Sites)", "Pre-Iron Age \u2014 Iron Age (20 Sites)",
+      "Pre-Iron Age, Iron Age \u2014 Early Historic (2 Sites)", "Iron Age (218 Sites)",
+      "Iron Age \u2014 Early Historic (21 Sites)", "Iron Age \u2014 Historical (2 Sites)",
+      "Early Historic (28 Sites)", "Historical (26 Sites)"
+    ],
+    series: [
+      { name: "Min (m)", data: [5, 93, 178, 14, 22, 294, 7, 10] },
+      { name: "Max (m)", data: [305, 466, 207, 1732, 788, 374, 671, 1319] },
+      { name: "Mean Elevation (m)", data: [127.62, 211.55, 192.50, 261.04, 214.81, 334.00, 160.79, 220.85] }
+    ]
+  }
+];
+</script>
 </body>
 </html>
