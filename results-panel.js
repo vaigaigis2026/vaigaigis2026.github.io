@@ -121,8 +121,9 @@
     }, 0);
     var estCharW = catSize * 0.58;
     var diagReach = longestLen * estCharW * Math.sin(rotationDeg * Math.PI / 180);
-    var neededBottom = 14 + diagReach + 18 + (dataset.xAxisLabel ? axisTitleSize + 8 : 0) + 10;
-    var marginBottom = Math.max(opts.marginBottom || 100, neededBottom);
+    var labelsEndY = 12 + diagReach + 8;
+    var neededBottom = labelsEndY + (dataset.xAxisLabel ? axisTitleSize + 14 : 8);
+    var marginBottom = Math.max(neededBottom, 46);
 
     var height = marginTop + plotH + marginBottom;
     var plotW = width - marginLeft - marginRight;
@@ -137,7 +138,7 @@
     p.push('<rect x="0" y="0" width="' + width + '" height="' + height + '" fill="' + COL_PANEL2 + '"/>');
 
     if (dataset.title) {
-      p.push('<text x="' + (width / 2) + '" y="' + (titleSize + 6) + '" text-anchor="middle" font-size="' + titleSize +
+      p.push('<text x="' + (width / 2) + '" y="' + (titleSize + 10) + '" text-anchor="middle" font-size="' + titleSize +
         '" font-weight="bold" fill="' + COL_INK + '">' + svgTextWithSuperscript(dataset.title, titleSize) + '</text>');
     }
 
@@ -174,12 +175,12 @@
 
     if (dataset.yAxisLabel) {
       p.push('<text x="' + (axisTitleSize + 4) + '" y="' + (marginTop + plotH / 2) + '" text-anchor="middle" font-size="' + axisTitleSize +
-        '" fill="' + COL_INK_DIM + '" transform="rotate(-90 ' + (axisTitleSize + 4) + ' ' + (marginTop + plotH / 2) + ')">' +
+        '" font-weight="600" fill="' + COL_INK_DIM + '" transform="rotate(-90 ' + (axisTitleSize + 4) + ' ' + (marginTop + plotH / 2) + ')">' +
         svgTextWithSuperscript(dataset.yAxisLabel, axisTitleSize) + '</text>');
     }
     if (dataset.xAxisLabel) {
-      p.push('<text x="' + (width / 2) + '" y="' + (height - 6) + '" text-anchor="middle" font-size="' + axisTitleSize +
-        '" fill="' + COL_INK_DIM + '">' + escapeXml(dataset.xAxisLabel) + '</text>');
+      p.push('<text x="' + (width / 2) + '" y="' + (marginTop + plotH + labelsEndY + axisTitleSize + 2).toFixed(1) + '" text-anchor="middle" font-size="' + axisTitleSize +
+        '" font-weight="600" fill="' + COL_INK_DIM + '">' + escapeXml(dataset.xAxisLabel) + '</text>');
     }
 
     p.push('</svg>');
@@ -222,8 +223,9 @@
     }, 0);
     var estCharWG = catSize * 0.58;
     var diagReachG = longestLenG * estCharWG * Math.sin(rotationDeg * Math.PI / 180);
-    var neededBottomG = 14 + diagReachG + 18 + (dataset.xAxisLabel ? axisTitleSize + 8 : 0) + 10;
-    var marginBottom = Math.max(opts.marginBottom || 90, neededBottomG);
+    var labelsEndYG = 12 + diagReachG + 8;
+    var neededBottomG = labelsEndYG + (dataset.xAxisLabel ? axisTitleSize + 14 : 8);
+    var marginBottom = Math.max(neededBottomG, 46);
 
     var height = marginTop + plotH + marginBottom + legendHeight;
     var plotW = width - marginLeft - marginRight;
@@ -239,7 +241,7 @@
     p.push('<rect x="0" y="0" width="' + width + '" height="' + height + '" fill="' + COL_PANEL2 + '"/>');
 
     if (dataset.title) {
-      p.push('<text x="' + (width / 2) + '" y="' + (titleSize + 6) + '" text-anchor="middle" font-size="' + titleSize +
+      p.push('<text x="' + (width / 2) + '" y="' + (titleSize + 10) + '" text-anchor="middle" font-size="' + titleSize +
         '" font-weight="bold" fill="' + COL_INK + '">' + svgTextWithSuperscript(dataset.title, titleSize) + '</text>');
     }
 
@@ -278,12 +280,12 @@
 
     if (dataset.yAxisLabel) {
       p.push('<text x="' + (axisTitleSize + 4) + '" y="' + (marginTop + plotH / 2) + '" text-anchor="middle" font-size="' + axisTitleSize +
-        '" fill="' + COL_INK_DIM + '" transform="rotate(-90 ' + (axisTitleSize + 4) + ' ' + (marginTop + plotH / 2) + ')">' +
+        '" font-weight="600" fill="' + COL_INK_DIM + '" transform="rotate(-90 ' + (axisTitleSize + 4) + ' ' + (marginTop + plotH / 2) + ')">' +
         svgTextWithSuperscript(dataset.yAxisLabel, axisTitleSize) + '</text>');
     }
     if (dataset.xAxisLabel) {
-      p.push('<text x="' + (width / 2) + '" y="' + (marginTop + plotH + marginBottom - 6) + '" text-anchor="middle" font-size="' + axisTitleSize +
-        '" fill="' + COL_INK_DIM + '">' + escapeXml(dataset.xAxisLabel) + '</text>');
+      p.push('<text x="' + (width / 2) + '" y="' + (marginTop + plotH + labelsEndYG + axisTitleSize + 2).toFixed(1) + '" text-anchor="middle" font-size="' + axisTitleSize +
+        '" font-weight="600" fill="' + COL_INK_DIM + '">' + escapeXml(dataset.xAxisLabel) + '</text>');
     }
 
     if (opts.showLegend !== false && legendHeight > 0) {
@@ -360,8 +362,7 @@
     modalBody.innerHTML = renderChart(dataset, {
       width: isGrouped ? 960 : 860,
       height: isGrouped ? 640 : 560,
-      marginLeft: 64, marginRight: 26, marginTop: 50,
-      marginBottom: isGrouped ? 150 : 150,
+      marginLeft: 64, marginRight: 26, marginTop: 58,
       legendHeight: isGrouped ? 66 : 0,
       titleSize: 19, tickSize: 12.5, valueSize: isGrouped ? 10 : 13,
       catSize: 10, axisTitleSize: 13.5, legendSize: 13,
