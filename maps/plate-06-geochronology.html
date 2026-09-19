@@ -747,39 +747,20 @@ document.getElementById('toggle-district').addEventListener('change', (e) => {
 <script>
 window.RESULTS_DATA = [
   {
-    title: "Basin and Archaeological Site Distribution Across Geochronological Units",
+    title: "Geo Chronological Analysis of the Vaigai Valley",
     titleSize: 15,
-    xAxisLabel: "Geochronological Unit",
-    yAxisLabel: "Values",
+    xAxisLabel: "Age Class",
+    yAxisLabel: "Counts",
     unit: "sites",
     total: 338,
     categories: [
-      "Charnockite Suite", "Modern Alluvium & Fluvial Deposits", "Migmatitic Gneiss Complex",
-      "Other / Unclassified", "Khondalite Suite", "Palaeo-Deposits / Ancient Channels",
-      "Upper Gondwana Group", "Pleistocene Residual & Aeolian Deposits", "Neoproterozoic Intrusives & Veins"
+      "Archaean-Proterozoic", "Neoproterozoic", "Early Holocene", "Meghalayan",
+      "Miocene-Pliocene", "Pleistocene", "Early Cretaceous", "Cenozoic", "Total"
     ],
     series: [
-      { name: "Basin %", data: [33.85, 26.58, 22.13, 7.01, 4.36, 3.66, 1.30, 0.75, 0.35] },
-      { name: "Sites (n)", data: [142, 106, 57, 8, 8, 10, 1, 3, 3] },
-      { name: "Site %", data: [42.01, 31.36, 16.86, 2.37, 2.37, 2.96, 0.30, 0.89, 0.89] }
-    ]
-  },
-  {
-    title: "Distribution of Archaeological Sites by Cultural Period and Geochronological Unit",
-    titleSize: 15,
-    xAxisLabel: "Geochronological Unit",
-    yAxisLabel: "Sites Count",
-    unit: "sites",
-    total: 338,
-    categories: [
-      "Charnockite Suite", "Modern Alluvium & Fluvial Deposits", "Migmatitic Gneiss Complex",
-      "Palaeo-Deposits / Ancient Channels", "Khondalite Suite", "Other / Unclassified",
-      "Neoproterozoic Intrusives & Veins", "Pleistocene Residual & Aeolian Deposits", "Upper Gondwana Group"
-    ],
-    series: [
-      { name: "Pre-Iron Age", data: [26, 10, 2, 3, 2, 0, 0, 0, 0] },
-      { name: "Iron Age", data: [105, 76, 43, 0, 5, 7, 1, 3, 1] },
-      { name: "Early Historic-Historical", data: [11, 20, 12, 7, 1, 1, 2, 0, 0] }
+      { name: "Pre-Iron Age Group (43 sites)", data: [30, 0, 3, 10, 0, 0, 0, 0, 43] },
+      { name: "Iron Age Group (241 sites)", data: [153, 1, 0, 76, 6, 3, 1, 1, 241] },
+      { name: "Early Historic and Historic Group (54 sites)", data: [24, 2, 7, 20, 1, 0, 0, 0, 54] }
     ]
   }
 ];
