@@ -580,7 +580,7 @@ const geoLayer = L.geoJSON(GEOCHRON_GEOJSON, {
 }).addTo(map);
 
 const geoLegendDiv = document.getElementById('geo-legend');
-Object.keys(AGE_INFO).forEach(litho => {
+Object.keys(AGE_INFO).sort((a, b) => a.localeCompare(b)).forEach(litho => {
   const info = AGE_INFO[litho];
   const row = document.createElement('div');
   row.className = 'zone-row';
@@ -785,7 +785,71 @@ document.getElementById('toggle-district').addEventListener('change', (e) => {
 <script src="district-nav.js"></script>
 
 <script>
-window.RESULTS_DATA = [];
+window.RESULTS_DATA = [
+  {
+    title: "Lithological Analysis of the Pre-Iron Age Group",
+    titleSize: 15,
+    xAxisLabel: "Lithology Class",
+    yAxisLabel: "Site Counts",
+    unit: "sites",
+    total: 43,
+    categories: [
+      "Acid to intermediate charnockite", "Black silty clay (active flood plain)",
+      "Hornblende-biotite gneiss", "Clayey sand (active floodplain)",
+      "Garnet-sillimanite-gneiss +graphite+cordierite", "Quartzite",
+      "Brown silty clay (palaeo tidal flat)", "Brown silty clay (palaeo lagoon)",
+      "Brown fine sand (palaeo beach ridge)"
+    ],
+    series: [
+      { name: "Pre-Iron Age", data: [9, 6, 1, 0, 1, 1, 1, 1, 1] },
+      { name: "Pre-Iron Age \u2014 Iron Age", data: [15, 2, 1, 2, 0, 0, 0, 0, 0] },
+      { name: "Pre-Iron Age \u2014 Iron Age \u2014 Early Historic", data: [2, 0, 0, 0, 0, 0, 0, 0, 0] },
+      { name: "Total", data: [26, 8, 2, 2, 1, 1, 1, 1, 1] }
+    ]
+  },
+  {
+    title: "Lithological Analysis of the Iron Age Cultural Group",
+    titleSize: 15,
+    xAxisLabel: "Lithology Class",
+    yAxisLabel: "Site Counts",
+    unit: "sites",
+    total: 241,
+    categories: [
+      "Acid to intermediate charnockite", "Black silty clay (active flood plain)",
+      "Hornblende-biotite gneiss", "Clayey sand (active floodplain)", "Mottled sandstone",
+      "Garnet-sillimanite-gneiss +graphite+cordierite", "Garnet-biotite gneiss", "Clayey sand",
+      "Argillaceous sandstone", "Coarse sand with rock fragments (active channel)",
+      "Granite", "Laterite", "Quartzite"
+    ],
+    series: [
+      { name: "Iron Age", data: [101, 52, 35, 13, 5, 3, 3, 3, 1, 1, 0, 1, 0] },
+      { name: "Iron Age \u2014 Early Historic", data: [3, 8, 4, 2, 1, 1, 0, 0, 0, 0, 1, 0, 1] },
+      { name: "Iron Age \u2014 Historical", data: [1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] },
+      { name: "Total", data: [105, 60, 40, 15, 6, 4, 3, 3, 1, 1, 1, 1, 1] }
+    ]
+  },
+  {
+    title: "Lithological Analysis of the Early Historic - Historical Cultural Group",
+    titleSize: 15,
+    xAxisLabel: "Lithological Class",
+    yAxisLabel: "Site Counts",
+    unit: "sites",
+    total: 54,
+    categories: [
+      "Black silty clay (active flood plain)", "Acid to intermediate charnockite",
+      "Hornblende-biotite gneiss", "Clayey sand (active floodplain)", "Garnet-biotite gneiss",
+      "Brown silty clay (palaeo tidal flat)", "Black clay underlain by coarse sand (palaeo)",
+      "Granite", "Garnet-sillimanite-gneiss +graphite+cordierite", "Pink granite gneiss",
+      "Mottled sandstone", "Brown silt (palaeo levee)", "Brown fine sand (palaeo beach ridge)",
+      "Coarse sand with rock fragments (active channel)"
+    ],
+    series: [
+      { name: "Early Historic", data: [8, 6, 5, 0, 3, 2, 1, 1, 1, 1, 0, 0, 0, 0] },
+      { name: "Historical", data: [7, 5, 3, 4, 0, 1, 1, 1, 0, 0, 1, 1, 1, 1] },
+      { name: "Total", data: [15, 11, 8, 4, 3, 3, 2, 2, 1, 1, 1, 1, 1, 1] }
+    ]
+  }
+];
 </script>
 </body>
 </html>
