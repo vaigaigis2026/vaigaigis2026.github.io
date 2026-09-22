@@ -780,11 +780,72 @@ document.getElementById('toggle-river').addEventListener('change', (e) => {
 document.getElementById('toggle-district').addEventListener('change', (e) => {
   if (e.target.checked) districtLayer.addTo(map); else map.removeLayer(districtLayer);
 });
+
+const GROUP_NAV_CONFIGS = [
+  { title: "Lithostratigraphic Group", field: "lithostrat_group", info: AGE_INFO }
+];
 </script>
 <script src="district-nav.js"></script>
+<script src="group-nav.js"></script>
 
 <script>
-window.RESULTS_DATA = [];
+window.RESULTS_DATA = [
+  {
+    title: "Lithostratigraphy Analysis of the Pre-Iron Age Cultural Group",
+    titleSize: 15,
+    xAxisLabel: "Lithostratigraphy Class",
+    yAxisLabel: "Site Counts",
+    unit: "sites",
+    total: 43,
+    categories: [
+      "Charnockite", "Active Fluvial Deposit", "Migmatite", "Khondalite",
+      "Palaeo Marine Deposit", "Palaeo Fluvial Deposit", "Upper Gondwana",
+      "Undifferentiated", "Total"
+    ],
+    series: [
+      { name: "Pre-Iron Age", data: [9, 6, 1, 2, 3, 0, 0, 0, 21] },
+      { name: "Pre-Iron Age \u2014 Iron Age", data: [15, 4, 1, 0, 0, 0, 0, 0, 20] },
+      { name: "Pre-Iron Age, Iron Age \u2014 Early Historic", data: [2, 0, 0, 0, 0, 0, 0, 0, 2] },
+      { name: "Total", data: [26, 10, 2, 2, 3, 0, 0, 0, 43] }
+    ]
+  },
+  {
+    title: "Lithostratigraphy Analysis of the Iron Age Cultural Group",
+    titleSize: 15,
+    xAxisLabel: "Lithostratigraphy Class",
+    yAxisLabel: "Site Counts",
+    unit: "sites",
+    total: 241,
+    categories: [
+      "Charnockite", "Active Fluvial Deposit", "Migmatite", "Khondalite",
+      "Upper Gondwana", "Palaeo Marine Deposit", "Palaeo Fluvial Deposit",
+      "Undifferentiated", "Total"
+    ],
+    series: [
+      { name: "Iron Age", data: [101, 66, 38, 3, 1, 0, 0, 9, 218] },
+      { name: "Iron Age \u2014 Early Historic", data: [3, 10, 4, 2, 0, 0, 0, 2, 21] },
+      { name: "Iron Age \u2014 Historical", data: [1, 0, 1, 0, 0, 0, 0, 0, 2] },
+      { name: "Total", data: [105, 76, 43, 5, 1, 0, 0, 11, 241] }
+    ]
+  },
+  {
+    title: "Lithostratigraphy Analysis of the Early Historic and Historical Cultural Group",
+    titleSize: 15,
+    xAxisLabel: "Lithostratigraphy Class",
+    yAxisLabel: "Site Counts",
+    unit: "sites",
+    total: 54,
+    categories: [
+      "Active Fluvial Deposit", "Migmatite", "Charnockite", "Palaeo Marine Deposit",
+      "Palaeo Fluvial Deposit", "Khondalite", "Upper Gondwana", "Undifferentiated", "Total"
+    ],
+    series: [
+      { name: "Early Historic", data: [8, 9, 6, 2, 1, 1, 0, 1, 28] },
+      { name: "Historical", data: [12, 3, 5, 2, 2, 0, 0, 2, 26] },
+      { name: "Total", data: [20, 12, 11, 4, 3, 1, 0, 3, 54] }
+    ]
+  }
+];
 </script>
 </body>
 </html>
