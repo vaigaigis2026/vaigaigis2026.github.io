@@ -781,8 +781,17 @@ document.getElementById('toggle-river').addEventListener('change', (e) => {
 document.getElementById('toggle-district').addEventListener('change', (e) => {
   if (e.target.checked) districtLayer.addTo(map); else map.removeLayer(districtLayer);
 });
+
+const LITHOLOGY_NAV_INFO = {};
+Object.keys(AGE_INFO).forEach(k => {
+  LITHOLOGY_NAV_INFO[k] = { color: AGE_INFO[k].color, display: toSentenceCase(k) };
+});
+const GROUP_NAV_CONFIGS = [
+  { title: "Lithology Group", field: "lithologic", info: LITHOLOGY_NAV_INFO }
+];
 </script>
 <script src="district-nav.js"></script>
+<script src="group-nav.js"></script>
 
 <script>
 window.RESULTS_DATA = [
