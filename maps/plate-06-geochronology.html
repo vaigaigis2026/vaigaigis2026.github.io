@@ -123,6 +123,9 @@
     <h2>Filter by Cultural Group</h2>
     <div id="filters"></div>
 
+    <h2>Filter by Lithology Group</h2>
+    <div id="lithology-filters"></div>
+
     <h2>Filter by Geochronological Age</h2>
     <div id="strat-filters"></div>
 
@@ -527,6 +530,27 @@ function geoStyle(feature) {
 const geoBackdrop = L.geoJSON(BOUNDARY_GEOJSON, {
   style: { fillColor: '#8a8676', color: 'transparent', weight: 0, fillOpacity: 1 }
 }).addTo(map);
+const LITHOLOGY_COLORS = {
+  "ACID TO INTERMEDIATE CHARNOCKITE": "#8dd3c7",
+  "ARGILLACEOUS SANDSTONE": "#ffed6f",
+  "BLACK CLAY UNDERLAIN BY COARSE SAND (PALAEO)": "#bebada",
+  "BLACK SILTY CLAY (ACTIVE FLOOD PLAIN)": "#fb8072",
+  "BROWN FINE SAND (PALAEO BEACH RIDGE)": "#80b1d3",
+  "BROWN SILT (PALAEO LEVEE)": "#fdb462",
+  "BROWN SILTY CLAY (PALAEO LAGOON)": "#b3de69",
+  "BROWN SILTY CLAY (PALAEO TIDAL FLAT)": "#fccde5",
+  "CLAYEY SAND": "#bc80bd",
+  "CLAYEY SAND (ACTIVE FLOODPLAIN)": "#ccebc5",
+  "COARSE SAND WITH ROCK FRAGMENTS (ACTIVE CHANNEL)": "#1f78b4",
+  "GARNET-BIOTITE GNEISS": "#33a02c",
+  "GARNET-SILLIMANITE-GNEISS +GRAPHITE+CORDIERITE": "#e31a1c",
+  "GRANITE": "#ff7f00",
+  "HORNBLENDE-BIOTITE GNEISS": "#6a3d9a",
+  "LATERITE": "#b15928",
+  "MOTTLED SANDSTONE": "#a6cee3",
+  "PINK GRANITE GNEISS": "#fb9a99",
+  "QUARTZITE": "#cab2d6"
+};
 const geoLayer = L.geoJSON(GEOCHRON_GEOJSON, {
   style: geoStyle,
   onEachFeature: (feature, layer) => {
@@ -650,6 +674,7 @@ const riverLabelLayer = L.layerGroup(
 const markers = {};
 const activePeriods = new Set(Object.keys(PERIOD_COLORS));
 const activeStrat = new Set(Object.keys(AGE_INFO));
+const activeLithology = new Set(Object.keys(LITHOLOGY_COLORS));
 let currentGeoOpacity = 1;
 
 function makeMarker(site) {
@@ -714,6 +739,24 @@ Object.keys(PERIOD_COLORS).forEach(period => {
   });
 });
 
+const lithologyFilterDiv = document.getElementById('lithology-filters');
+Object.keys(LITHOLOGY_COLORS).forEach(litho => {
+  const id = 'lf_' + litho.replace(/[^a-zA-Z]/g, '');
+  const wrap = document.createElement('label');
+  wrap.className = 'filter-item';
+  wrap.innerHTML = `
+    <input type="checkbox" id="${id}" checked>
+    <span class="swatch" style="background:${LITHOLOGY_COLORS[litho]}"></span>
+    <span>${toSentenceCase(litho)}</span>
+  `;
+  lithologyFilterDiv.appendChild(wrap);
+  wrap.querySelector('input').addEventListener('change', (e) => {
+    if (e.target.checked) activeLithology.add(litho);
+    else activeLithology.delete(litho);
+    applyFilter();
+  });
+});
+
 const stratFilterDiv = document.getElementById('strat-filters');
 Object.keys(AGE_INFO).forEach(strat => {
   const info = AGE_INFO[strat];
@@ -737,7 +780,7 @@ Object.keys(AGE_INFO).forEach(strat => {
 function applyFilter() {
   let count = 0;
   Object.values(markers).forEach(({marker, site}) => {
-    if (activePeriods.has(site.period_group) && activeStrat.has(site.geo_age)) {
+    if (activePeriods.has(site.period_group) && activeStrat.has(site.geo_age) && activeLithology.has(site.lithologic)) {
       if (!map.hasLayer(marker)) marker.addTo(map);
       count++;
     } else {
