@@ -4081,17 +4081,17 @@ document.getElementById('toggle-district').addEventListener('change', (e) => {
 
 window.RESULTS_DATA = [
   {
-    title: "Soil Erosion Levels by Cultural Group",
+    title: "Proportion of Sites by Soil Erosion Level",
     titleSize: 15,
     xAxisLabel: "Soil Erosion Level",
-    yAxisLabel: "Site Counts",
-    unit: "sites",
+    yAxisLabel: "Proportion of sites",
+    unit: "proportion",
     total: 338,
     categories: ["Slight", "Moderate", "Severe", "Very severe, gullied"],
     series: [
-      { name: "Pre-Iron Age", data: [29, 12, 2, 0] },
-      { name: "Iron Age", data: [155, 55, 30, 1] },
-      { name: "Early Historic — Historical", data: [38, 13, 2, 1] }
+      { name: "Pre-Iron Age", data: [0.674, 0.279, 0.047, 0.000] },
+      { name: "Iron Age", data: [0.643, 0.228, 0.124, 0.004] },
+      { name: "Early Historic — Historical", data: [0.704, 0.241, 0.037, 0.019] }
     ]
   },
   {
@@ -4106,20 +4106,6 @@ window.RESULTS_DATA = [
       { name: "Pre-Iron Age", data: [0.953, 0.047] },
       { name: "Iron Age", data: [0.871, 0.129] },
       { name: "Early Historic — Historical", data: [0.944, 0.056] }
-    ]
-  },
-  {
-    title: "Proportion of Sites by Soil Erosion Level",
-    titleSize: 15,
-    xAxisLabel: "Soil Erosion Level",
-    yAxisLabel: "Proportion of sites",
-    unit: "proportion",
-    total: 338,
-    categories: ["Slight", "Moderate", "Severe", "Very severe, gullied"],
-    series: [
-      { name: "Pre-Iron Age", data: [0.674, 0.279, 0.047, 0.000] },
-      { name: "Iron Age", data: [0.643, 0.228, 0.124, 0.004] },
-      { name: "Early Historic — Historical", data: [0.704, 0.241, 0.037, 0.019] }
     ]
   }
 ];
