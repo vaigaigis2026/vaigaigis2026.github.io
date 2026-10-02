@@ -4081,31 +4081,31 @@ document.getElementById('toggle-district').addEventListener('change', (e) => {
 
 window.RESULTS_DATA = [
   {
-    title: "Proportion of Sites by Soil Erosion Level",
+    title: "Soil Erosion by Chronological Group",
     titleSize: 15,
     xAxisLabel: "Soil Erosion Level",
-    yAxisLabel: "Proportion of sites",
-    unit: "proportion",
+    yAxisLabel: "Percentage of sites (%)",
+    unit: "%",
     total: 338,
-    categories: ["Slight", "Moderate", "Severe", "Very severe, gullied"],
+    categories: ["Slight", "Moderate", "Severe", "Very Severe Gullied"],
     series: [
-      { name: "Pre-Iron Age", data: [0.674, 0.279, 0.047, 0.000] },
-      { name: "Iron Age", data: [0.643, 0.228, 0.124, 0.004] },
-      { name: "Early Historic — Historical", data: [0.704, 0.241, 0.037, 0.019] }
+      { name: "Pre-Iron Age Group (n=43)", data: [67.4, 27.9, 4.7, 0] },
+      { name: "Iron Age Group (n=241)", data: [64.3, 22.8, 12.4, 0.4] },
+      { name: "Early Historic-Historical Group (n=54)", data: [70.4, 24.1, 3.7, 1.9] }
     ]
   },
   {
-    title: "Stable vs Unstable Soils by Cultural Group",
+    title: "Stable vs Unstable Soils by Chronological Group",
     titleSize: 15,
     xAxisLabel: "Soil stability",
-    yAxisLabel: "Proportion of sites",
-    unit: "proportion",
+    yAxisLabel: "Percentage of sites (%)",
+    unit: "%",
     total: 338,
-    categories: ["Stable (Slight + Moderate)", "Unstable (Severe + Very severe)"],
+    categories: ["Stable Soils (Slight + Moderate)", "Unstable Soils (Severe + Very Severe)"],
     series: [
-      { name: "Pre-Iron Age", data: [0.953, 0.047] },
-      { name: "Iron Age", data: [0.871, 0.129] },
-      { name: "Early Historic — Historical", data: [0.944, 0.056] }
+      { name: "Pre-Iron Age Group", data: [95.3, 4.7] },
+      { name: "Iron Age Group", data: [87.1, 12.9] },
+      { name: "Early Historic-Historical Group", data: [94.4, 5.6] }
     ]
   }
 ];
