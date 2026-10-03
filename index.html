@@ -308,8 +308,6 @@
 <script>
 
 // --- site-labels inject ---
-// Injects maps/site-labels.js into every plate iframe so "Site names"
-// appears under Layers without editing each plate HTML.
 (function () {
   function injectSiteLabels() {
     var frame = document.getElementById('mapFrame');
@@ -321,16 +319,13 @@
       if (doc.getElementById('site-labels-injected')) return;
       var s = doc.createElement('script');
       s.id = 'site-labels-injected';
-      // Resolve next to the plate file (maps/site-labels.js)
       try {
         var plateUrl = frame.src || win.location.href;
         s.src = new URL('site-labels.js', plateUrl).href;
       } catch (e) {
         s.src = 'maps/site-labels.js';
       }
-      s.onerror = function () {
-        console.warn('[site-labels] failed to load', s.src);
-      };
+      s.onerror = function () { console.warn('[site-labels] failed to load', s.src); };
       (doc.body || doc.documentElement).appendChild(s);
     } catch (e) {
       console.warn('[site-labels] inject failed:', e);
@@ -339,7 +334,6 @@
   var frame = document.getElementById('mapFrame');
   if (frame) {
     frame.addEventListener('load', function () {
-      // small delay so plate scripts finish defining map/markers
       setTimeout(injectSiteLabels, 150);
     });
   }
@@ -368,12 +362,12 @@ const PLATES = [
   { n: 6,  slug: 'geochronology', title: 'Geochronology', desc: 'Lithological and geochronological units (Bhukosh, GSI) across the Vaigai basin, with archaeological site distribution by rock unit and cultural period.', file: 'maps/plate-06-geochronology.html', ready: true, v: 1 },
   { n: 7,  slug: 'lithology', title: 'Lithology', desc: 'Detailed lithological classification (50 rock/sediment types, Bhukosh GSI) across the Vaigai basin, with archaeological site distribution by rock type.', file: 'maps/plate-07-lithology.html', ready: true, v: 1 },
   { n: 8,  slug: 'lithostratigraphy', title: 'Lithostratigraphy', desc: 'Named lithostratigraphic units and suites (13 classes, Bhukosh GSI) across the Vaigai basin, with archaeological site distribution by formation.', file: 'maps/plate-08-lithostratigraphy.html', ready: true, v: 1 },
-  { n: 9,  slug: 'plate-09', title: 'Plate 09', desc: 'Awaiting map file.', file: null, ready: false, v: 1 },
-  { n: 10, slug: 'plate-10', title: 'Plate 10', desc: 'Awaiting map file.', file: null, ready: false, v: 1 },
-  { n: 11, slug: 'plate-11', title: 'Plate 11', desc: 'Awaiting map file.', file: null, ready: false, v: 1 },
-  { n: 12, slug: 'plate-12', title: 'Plate 12', desc: 'Awaiting map file.', file: null, ready: false, v: 1 },
-  { n: 13, slug: 'plate-13', title: 'Plate 13', desc: 'Awaiting map file.', file: null, ready: false, v: 1 },
-  { n: 14, slug: 'plate-14', title: 'Plate 14', desc: 'Awaiting map file.', file: null, ready: false, v: 1 },
+  { n: 9,  slug: 'geomorphology', title: 'Geomorphology', desc: 'Geomorphological units (Bhukosh/GSI) clipped to the Vaigai study area, with archaeological sites joined by landform type.', file: 'maps/plate-09-geomorphology.html', ready: true, v: 1 },
+  { n: 10, slug: 'lulc', title: 'Land Use / Land Cover', desc: 'INDIA-WRIS land use/land cover across the Vaigai basin, with archaeological sites joined to LULC class and filterable by cultural period.', file: 'maps/plate-10-lulc.html', ready: true, v: 1 },
+  { n: 11, slug: 'soil-depth', title: 'Soil Depth Classification', desc: 'INDIA-WRIS soil depth classes across the Vaigai basin, with archaeological sites joined to depth class and filterable by cultural period.', file: 'maps/plate-11-soil-depth.html', ready: true, v: 1 },
+  { n: 12, slug: 'soil-erosion', title: 'Soil Erosion', desc: 'Soil erosion vulnerability levels (Slight–Very severe) across the Vaigai basin, with archaeological sites joined to erosion class and filterable by cultural period.', file: 'maps/plate-12-soil-erosion.html', ready: true, v: 1 },
+  { n: 13, slug: 'soil-productivity', title: 'Soil Productivity', desc: 'Soil productivity classes (Non–Highly Productive) across the Vaigai basin, with archaeological sites joined to productivity class and filterable by cultural period.', file: 'maps/plate-13-soil-productivity.html', ready: true, v: 1 },
+  { n: 14, slug: 'soil-texture', title: 'Soil Texture', desc: 'Soil textural fields (Fine–Rocky/non-soil) across the Vaigai basin, with archaeological sites joined to texture class and filterable by cultural period.', file: 'maps/plate-14-soil-texture.html', ready: true, v: 1 },
   { n: 15, slug: 'plate-15', title: 'Plate 15', desc: 'Awaiting map file.', file: null, ready: false, v: 1 },
   { n: 16, slug: 'plate-16', title: 'Plate 16', desc: 'Awaiting map file.', file: null, ready: false, v: 1 },
   { n: 17, slug: 'plate-17', title: 'Plate 17', desc: 'Awaiting map file.', file: null, ready: false, v: 1 },
