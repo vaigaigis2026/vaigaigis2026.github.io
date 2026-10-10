@@ -4091,15 +4091,33 @@ window.RESULTS_DATA = [
     yAxisLabel: "Number of Sites",
     unit: "sites",
     total: 338,
-    categories: ["Zone 1 (0–500 m)", "Zone 2 (500–1,000 m)", "Zone 3 (1,000–2,000 m)", "Zone 4 (2,000–5,000 m)", "Zone 5 (>5,000 m)"],
+    categories: ["Zone 1", "Zone 2", "Zone 3", "Zone 4", "Zone 5", "Total"],
     series: [
-      { name: "Pre-Iron Age Group", data: [5, 5, 2, 2, 29] },
-      { name: "Iron Age Group", data: [66, 42, 54, 29, 50] },
-      { name: "Early Historic–Historical Group", data: [10, 6, 15, 11, 12] }
+      { name: "Pre-Iron Age Group", data: [5, 5, 2, 2, 29, 43] },
+      { name: "Iron Age Group", data: [66, 42, 54, 29, 50, 241] },
+      { name: "Early Historic–Historical Group", data: [10, 6, 15, 11, 12, 54] },
+      { name: "Total", data: [81, 53, 71, 42, 91, 338] }
     ]
   },
   {
-    title: "Proximity – Cultural Group Analysis",
+    title: "Proximity Zones - Cultural Group Analysis",
+    titleSize: 15,
+    xAxisLabel: "Cultural Group",
+    yAxisLabel: "Number of Sites",
+    unit: "sites",
+    total: 338,
+    categories: ["Pre-Iron Age Group", "Iron Age Group", "Early Historic–Historical Group", "Total"],
+    series: [
+      { name: "Zone 1", data: [5, 66, 10, 81] },
+      { name: "Zone 2", data: [5, 42, 6, 53] },
+      { name: "Zone 3", data: [2, 54, 15, 71] },
+      { name: "Zone 4", data: [2, 29, 11, 42] },
+      { name: "Zone 5", data: [29, 50, 12, 91] },
+      { name: "Total", data: [43, 241, 54, 338] }
+    ]
+  },
+  {
+    title: "Proximity - Cultural Group Analysis",
     titleSize: 15,
     xAxisLabel: "Proximity Measure",
     yAxisLabel: "Percentage",
