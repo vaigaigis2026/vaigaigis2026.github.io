@@ -84,7 +84,7 @@
     .zone-row { display:flex; align-items:center; gap:8px; margin:3px 0; font-size:11px; }
     .zone-row .zbox { width:14px; height:14px; border-radius:2px; border:1px solid rgba(0,0,0,0.25); flex-shrink:0; }
     .zone-row .zlabel { line-height:1.25; }
-    .zone-row .zrange { color: #666; font-size: 10px; }
+    .zone-row .zrange { color:#666; font-size:10px; }
     .threshold-bar-wrap { margin: 6px 0; }
     .threshold-bar-label { display:flex; justify-content:space-between; font-size:11px; margin-bottom:2px; }
     .threshold-bar-track { height:8px; background:rgba(128,128,128,0.15); border-radius:3px; overflow:hidden; }
@@ -4020,7 +4020,7 @@ if (twiFilterDiv) {
   const order = ["Very Low Moisture","Low Moisture","Moderate Moisture","High Moisture","Very High Moisture","Extreme Moisture"];
   siteClasses.sort((a,b) => order.indexOf(a) - order.indexOf(b));
   siteClasses.forEach(cls => {
-    const info = TWI_INFO[cls] || { color: '#999', range: '' };
+    const info = TWI_INFO[cls] || { color: '#999' };
     const wrap = document.createElement('label');
     wrap.className = 'filter-item';
     const rangeTxt = info.range ? ' <span style="color:#666;font-size:10px;">(' + info.range + ')</span>' : '';
@@ -4046,8 +4046,7 @@ if (twiFilterDiv) {
     const pct = (count / maxC) * 100;
     const wrap = document.createElement('div');
     wrap.className = 'threshold-bar-wrap';
-    const rangeTxt = info.range ? ' <span style="color:#666;font-size:10px;">(' + info.range + ')</span>' : '';
-    wrap.innerHTML = '<div class="threshold-bar-label"><span>' + cls + rangeTxt + '</span><span>' + count + '</span></div>' +
+    wrap.innerHTML = '<div class="threshold-bar-label"><span>' + cls + '</span><span>' + count + '</span></div>' +
       '<div class="threshold-bar-track"><div class="threshold-bar-fill" style="width:' + pct + '%;background:' + info.color + '"></div></div>';
     div.appendChild(wrap);
   });
