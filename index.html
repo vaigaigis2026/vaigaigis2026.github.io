@@ -55,6 +55,13 @@
   .pill-btn:focus-visible, button:focus-visible, input:focus-visible, [tabindex]:focus-visible {
     outline: 2px solid var(--accent); outline-offset: 2px;
   }
+  .header-left { display:flex; align-items:flex-start; gap:14px; min-width:0; }
+  #home-btn {
+    display:none; flex-shrink:0; align-self:center;
+    border-color: var(--accent); color: var(--accent); font-weight:700;
+  }
+  #home-btn:hover { background: var(--accent); color:#1a0f00; border-color: var(--accent); }
+  body.not-home #home-btn { display:inline-block; }
   .export-dropdown { position: relative; }
   .export-dropdown .pill-btn:disabled {
     opacity: 0.45; cursor: not-allowed;
@@ -385,10 +392,13 @@
 <div id="app">
   <header>
     <div class="header-row">
-      <div>
+      <div class="header-left">
+        <button class="pill-btn" id="home-btn" type="button" title="Back to the atlas home page">&larr; Atlas Home</button>
+        <div>
         <div class="site-brand">VaigaiGIS2026 // Atlas</div>
         <h1 id="home-link">Vaigai Valley GIS Archaeological Study</h1>
         <p class="subtitle">Settlement Dynamics and Environmental Determinants of the Vaigai Valley — Interactive Map Series</p>
+        </div>
       </div>
       <div class="header-actions">
         <button class="pill-btn" id="menu-toggle" title="Open plate list">☰</button>
@@ -557,7 +567,7 @@
 // serving a cached copy of the old one under the same filename.
 // ---------------------------------------------------------------
 const PLATES = [
-  { n: 1,  slug: 'site-distribution', title: 'Archaeological Site Distribution', desc: 'Settlement locations by cultural period across the Vaigai basin, with elevation, boundary, river and district reference layers.', file: 'maps/plate-01-site-distribution.html', ready: true, v: 2 },
+  { n: 1,  slug: 'site-distribution', title: 'Archaeological Site Distribution', desc: 'Settlement locations by cultural period across the Vaigai basin, with elevation, boundary, river and district reference layers.', file: 'maps/plate-01-site-distribution.html', ready: true, v: 3 },
   { n: 2,  slug: 'contour-elevation', title: 'Contour & Elevation Zones', desc: 'Terrain contours and elevation banding across the Vaigai basin, providing topographic context for site placement.', file: 'maps/plate-02-contour-elevation.html', ready: true, v: 1 },
   { n: 3,  slug: 'slope-gradient', title: 'Slope Gradient (Reclassified)', desc: 'Reclassified terrain slope across the Vaigai basin, with settlement distribution by slope class and filtering by cultural period.', file: 'maps/plate-03-slope-gradient.html', ready: true, v: 1 },
   { n: 4,  slug: 'plate-04', title: 'Slope Aspect & Settlement Distribution', desc: 'Topographic orientation (8-direction aspect, reclassified) with slope gradient toggle, settlement locations by cultural period, and boundary, river and district reference layers.', file: 'maps/plate-04-slope-aspect.html', ready: true, v: 1 },
@@ -1217,6 +1227,30 @@ const KEY_FINDINGS_PLACEHOLDER = `
 function pad(n) { return String(n).padStart(2, '0'); }
 
 // ---------------------------------------------------------------
+// NAVIGATION
+// Plate-to-plate moves REPLACE the current history entry instead of adding
+// a new one, so the browser history stays short:
+//   GitHub  ->  Atlas home  ->  (whichever plate you are on)
+// The Atlas Home button steps back to the home entry, so one more browser
+// Back goes straight to wherever you came from (e.g. GitHub).
+// ---------------------------------------------------------------
+function navigate(hash) {
+  hash = (hash || '').replace(/^#/, '');
+  const cur = location.hash.replace(/^#/, '');
+  const st = history.state || {};
+  if (hash === cur) { route(); return; }
+  if (!hash) {
+    if (st.fromHome) { history.back(); return; }   // route() runs via hashchange
+    history.replaceState(null, '', location.pathname + location.search);
+    route();
+    return;
+  }
+  if (!cur) history.pushState({ fromHome: true }, '', '#' + hash);
+  else history.replaceState({ fromHome: !!st.fromHome }, '', '#' + hash);
+  route();
+}
+
+// ---------------------------------------------------------------
 // Generative thumbnail: a small "survey sheet" preview (graticule +
 // scattered site dots) so every plate has a visual card even before
 // a real screenshot exists. Ready plates get the amber/teal palette,
@@ -1374,7 +1408,7 @@ sectionsInUse.forEach(sec => {
       el.addEventListener('click', () => {
         // If currently browsing Key Findings, stay in findings; otherwise open the map plate
         const inFindings = location.hash.startsWith('#findings');
-        location.hash = inFindings ? ('findings/' + p.slug) : p.slug;
+        navigate(inFindings ? ('findings/' + p.slug) : p.slug);
         closeMobileSidebar();
       });
     }
@@ -1394,7 +1428,7 @@ sectionsInUse.forEach(sec => {
     </div>
   `;
     if (p.ready) {
-      card.addEventListener('click', () => { location.hash = p.slug; });
+      card.addEventListener('click', () => { navigate(p.slug); });
     }
     secGrid.appendChild(card);
 
@@ -1410,7 +1444,7 @@ sectionsInUse.forEach(sec => {
         <span class="status-tag ${hasFindings ? 'ready' : 'pending'}">${hasFindings ? 'Findings available' : 'Coming soon'}</span>
       </div>
     `;
-    fCard.addEventListener('click', () => { location.hash = 'findings/' + p.slug; });
+    fCard.addEventListener('click', () => { navigate('findings/' + p.slug); });
     fSecGrid.appendChild(fCard);
   });
 });
@@ -1429,20 +1463,27 @@ function hideAllViews() {
 }
 
 function showHome() {
+  document.body.classList.remove('not-home');
   hideAllViews();
   homeView.classList.remove('hidden');
   document.querySelectorAll('.plate-link').forEach(el => el.classList.remove('active'));
 }
 
 function showPlate(plate) {
+  document.body.classList.add('not-home');
   hideAllViews();
   plateBody.style.display = '';
   mapFrame.style.display = 'block';
   const src = plate.file + '?v=' + (plate.v || 1);
   const isNewPlate = mapFrame.getAttribute('data-current') !== src;
   if (isNewPlate) {
-    mapFrame.src = src;
     mapFrame.setAttribute('data-current', src);
+    // location.replace() keeps the iframe from adding its own history entries
+    try {
+      mapFrame.contentWindow.location.replace(new URL(src, document.baseURI).href);
+    } catch (e) {
+      mapFrame.src = src;
+    }
   }
   topbar.classList.add('show');
   crumbCurrent.textContent = `SHEET ${pad(plate.n)}/22 — ${plate.title.toUpperCase()}`;
@@ -1460,17 +1501,19 @@ function showPlate(plate) {
   const idx = readyPlates.findIndex(p => p.slug === plate.slug);
   prevBtn.disabled = idx <= 0;
   nextBtn.disabled = idx === -1 || idx >= readyPlates.length - 1;
-  prevBtn.onclick = () => { if (idx > 0) location.hash = readyPlates[idx - 1].slug; };
-  nextBtn.onclick = () => { if (idx < readyPlates.length - 1) location.hash = readyPlates[idx + 1].slug; };
+  prevBtn.onclick = () => { if (idx > 0) navigate(readyPlates[idx - 1].slug); };
+  nextBtn.onclick = () => { if (idx < readyPlates.length - 1) navigate(readyPlates[idx + 1].slug); };
 }
 
 function showFindingsGrid() {
+  document.body.classList.add('not-home');
   hideAllViews();
   findingsView.classList.add('show');
   document.querySelectorAll('.plate-link').forEach(el => el.classList.remove('active'));
 }
 
 function showFindingsDetail(plate) {
+  document.body.classList.add('not-home');
   hideAllViews();
   findingsDetail.classList.add('show');
   findingsSheetNum.textContent = `SHEET ${pad(plate.n)}/22`;
@@ -1514,22 +1557,23 @@ function route() {
     return;
   }
   // fallback
-  location.hash = '';
+  history.replaceState(null, '', location.pathname + location.search);
   showHome();
 }
 window.addEventListener('hashchange', route);
 route();
 
-document.getElementById('home-link').addEventListener('click', () => { location.hash = ''; });
-document.getElementById('crumb-home').addEventListener('click', () => { location.hash = ''; });
-document.getElementById('key-findings-header').addEventListener('click', () => { location.hash = 'findings'; });
+document.getElementById('home-link').addEventListener('click', () => { navigate(''); });
+document.getElementById('home-btn').addEventListener('click', () => { navigate(''); });
+document.getElementById('crumb-home').addEventListener('click', () => { navigate(''); });
+document.getElementById('key-findings-header').addEventListener('click', () => { navigate('findings'); });
 document.getElementById('key-findings-plate').addEventListener('click', () => {
   const current = location.hash.replace('#', '');
   const plate = PLATES.find(p => p.slug === current);
-  if (plate) location.hash = 'findings/' + plate.slug;
-  else location.hash = 'findings';
+  if (plate) navigate('findings/' + plate.slug);
+  else navigate('findings');
 });
-document.getElementById('findings-back').addEventListener('click', () => { location.hash = 'findings'; });
+document.getElementById('findings-back').addEventListener('click', () => { navigate('findings'); });
 
 // Keyboard paging between plates (ignored while typing in a filter box)
 document.addEventListener('keydown', (e) => {
@@ -1623,7 +1667,7 @@ function closeMobileSidebar() {
   }
 
   function plateIsOpen() {
-    return !!(mapFrame && mapFrame.style.display !== 'none' && mapFrame.src);
+    return !!(mapFrame && mapFrame.style.display !== 'none' && mapFrame.getAttribute('data-current'));
   }
 
   function syncExportEnabled() {
