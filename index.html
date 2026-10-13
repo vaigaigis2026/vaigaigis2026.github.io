@@ -479,38 +479,42 @@
 <script src="results-panel.js"></script>
 <script>
 
-// --- site-labels inject ---
+// --- site-labels + map-export inject ---
 (function () {
-  function injectSiteLabels() {
+  function injectIntoMap(scriptId, fileName, logTag) {
     var frame = document.getElementById('mapFrame');
     if (!frame) return;
     try {
       var doc = frame.contentDocument;
       var win = frame.contentWindow;
       if (!doc || !win) return;
-      if (doc.getElementById('site-labels-injected')) return;
+      if (doc.getElementById(scriptId)) return;
       var s = doc.createElement('script');
-      s.id = 'site-labels-injected';
+      s.id = scriptId;
       try {
         var plateUrl = frame.src || win.location.href;
-        s.src = new URL('site-labels.js', plateUrl).href;
+        s.src = new URL(fileName, plateUrl).href;
       } catch (e) {
-        s.src = 'maps/site-labels.js';
+        s.src = 'maps/' + fileName;
       }
-      s.onerror = function () { console.warn('[site-labels] failed to load', s.src); };
+      s.onerror = function () { console.warn('[' + logTag + '] failed to load', s.src); };
       (doc.body || doc.documentElement).appendChild(s);
     } catch (e) {
-      console.warn('[site-labels] inject failed:', e);
+      console.warn('[' + logTag + '] inject failed:', e);
     }
+  }
+  function injectAll() {
+    injectIntoMap('site-labels-injected', 'site-labels.js', 'site-labels');
+    injectIntoMap('map-export-injected', 'map-export.js', 'map-export');
   }
   var frame = document.getElementById('mapFrame');
   if (frame) {
     frame.addEventListener('load', function () {
-      setTimeout(injectSiteLabels, 150);
+      setTimeout(injectAll, 150);
     });
   }
 })();
-// --- end site-labels inject ---
+// --- end site-labels + map-export inject ---
 
 </script>
 
