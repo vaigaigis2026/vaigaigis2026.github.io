@@ -110,6 +110,29 @@
   .plate-link.active .plate-num { color: var(--accent); }
   .plate-title { flex:1; line-height:1.3; color: var(--ink-dim); }
 
+  /* ---------- Themed sections (sidebar groups + home headings) ---------- */
+  .plate-group { border-bottom: 1px solid var(--line-soft); }
+  .group-head {
+    display:flex; align-items:flex-start; gap:8px; width:100%; text-align:left;
+    background:none; border:0; border-left:3px solid transparent; color: var(--ink); cursor:pointer;
+    padding: 10px 16px; font-family: var(--font-body);
+  }
+  .group-head:hover { background: var(--panel); }
+  .group-head:focus-visible { outline: 2px solid var(--accent); outline-offset:-2px; }
+  .group-chev { flex-shrink:0; width:10px; margin-top:2px; font-size:10px; color: var(--accent); transition: transform .15s ease; }
+  .plate-group.collapsed .group-chev { transform: rotate(-90deg); }
+  .group-text { display:flex; flex-direction:column; gap:3px; min-width:0; }
+  .group-title { font-family: var(--font-head); font-size:13px; font-weight:700; text-transform:uppercase; letter-spacing:.3px; line-height:1.25; color: var(--ink); }
+  .group-range { font-family: var(--font-mono); font-size:10px; letter-spacing:1.2px; text-transform:uppercase; color: var(--accent); }
+  .plate-group.collapsed .group-body { display:none; }
+  #plate-list.filtering .plate-group .group-body { display:block; }
+  .plate-group.hide { display:none; }
+  .section-block { margin-bottom: 30px; }
+  .section-heading { display:flex; align-items:baseline; flex-wrap:wrap; gap:6px 14px; margin: 0 0 12px; padding-left:10px; border-left:3px solid var(--accent); }
+  .section-heading .sec-title { font-family: var(--font-head); font-size:17px; font-weight:700; text-transform:uppercase; letter-spacing:.3px; color: var(--ink); }
+  .section-heading .sec-range { font-family: var(--font-mono); font-size:10.5px; letter-spacing:1.5px; text-transform:uppercase; color: var(--accent); }
+  .section-block.hide { display:none; }
+
   #content { flex:1; position:relative; min-width:0; background: var(--bg); overflow:auto; }
   #plate-body { position:absolute; inset:0; top:34px; display:flex; min-height:0; }
   #mapFrame { flex:1 1 100%; width:100%; height:100%; border:0; background:white; display:none; min-width:0; }
@@ -119,8 +142,10 @@
   }
   #plate-body.results-open #mapFrame { flex:1 1 54%; }
   #plate-body.results-open #results-panel { display:block; }
-  #plate-topbar .nav-btn.results-toggle { width:auto; padding:0 10px; font-family:var(--font-mono); text-transform:uppercase; letter-spacing:.5px; }
-  #plate-topbar .nav-btn.results-toggle.active { border-color: var(--accent); color: var(--accent); }
+  #plate-topbar .nav-btn.results-toggle { width:auto; padding:0 12px; font-family:var(--font-mono); text-transform:uppercase; letter-spacing:.5px; font-weight:700; background:#F28C1B; border-color:#F28C1B; color:#1a0f00; }
+  #plate-topbar .nav-btn.results-toggle:hover:not(:disabled) { background:#FFA23A; border-color:#FFA23A; color:#1a0f00; }
+  #plate-topbar .nav-btn.results-toggle.active,
+  #plate-topbar .nav-btn.results-toggle.active:hover:not(:disabled) { background:#B85C00; border-color:#FFB866; color:#fff; box-shadow:0 0 0 2px rgba(242,140,27,.35); }
   @media (max-width: 900px) {
     #plate-body.results-open { flex-direction:column; }
     #plate-body.results-open #mapFrame { flex:0 0 45%; }
@@ -279,7 +304,7 @@
         <span class="sep">/</span>
         <span id="crumb-current"></span>
         <span class="flex-spacer"></span>
-        <button class="nav-btn results-toggle" id="results-toggle" title="Show results/statistics for this plate">Results</button>
+        <button class="nav-btn results-toggle" id="results-toggle" title="Show info graphics for this plate">Info Graphics</button>
         <button class="nav-btn" id="prev-plate" title="Previous plate">‹</button>
         <button class="nav-btn" id="next-plate" title="Next plate">›</button>
       </div>
@@ -295,7 +320,7 @@
           <span>The Plates</span>
           <input type="text" id="home-search" placeholder="Filter plates...">
         </h3>
-        <div class="plate-grid" id="plate-grid"></div>
+        <div id="plate-grid"></div>
       </div>
       <div id="plate-body">
         <iframe id="mapFrame" title="Map plate viewer"></iframe>
@@ -456,24 +481,74 @@ mapFrame.addEventListener('load', () => {
 });
 
 // Build sidebar
-PLATES.forEach(p => {
-  const el = document.createElement('div');
-  el.className = 'plate-link' + (p.ready ? '' : ' disabled');
-  el.dataset.slug = p.slug;
-  el.dataset.search = (p.title + ' ' + p.desc).toLowerCase();
-  el.innerHTML = `<span class="plate-num">${pad(p.n)}</span><span class="plate-title">${p.title}</span>`;
-  if (p.ready) {
-    el.addEventListener('click', () => { location.hash = p.slug; closeMobileSidebar(); });
-  }
-  sidebarList.appendChild(el);
-});
+// ---------------------------------------------------------------
+// THEMED SECTIONS
+// Each plate belongs to the section whose from-to range contains its number.
+// TO REGROUP: edit the ranges / titles here. Any plate outside every range
+// is placed in a trailing "Other Plates" section so nothing disappears.
+// ---------------------------------------------------------------
+const SECTIONS = [
+  { id: 'terrain',    title: 'Physiographic and Terrain Setting',                 from: 1,  to: 4  },
+  { id: 'hypsometry', title: 'Hypsometric Analysis of the Vaigai Valley',         from: 5,  to: 5  },
+  { id: 'geology',    title: 'Geological and Geomorphological Framework',         from: 6,  to: 9  },
+  { id: 'landuse',    title: 'Land Use, Soil Character and Agricultural Potential', from: 10, to: 14 },
+  { id: 'fluvial',    title: 'Fluvial System and Hydrological Determinants',      from: 15, to: 20 },
+  { id: 'movement',   title: 'Movement Corridors and Intra-Basin Connectivity',   from: 21, to: 22 },
+];
+const sectionsInUse = SECTIONS.map(sec => ({ ...sec, plates: PLATES.filter(p => p.n >= sec.from && p.n <= sec.to) }));
+const stray = PLATES.filter(p => !SECTIONS.some(sec => p.n >= sec.from && p.n <= sec.to));
+if (stray.length) sectionsInUse.push({ id: 'other', title: 'Other Plates', from: stray[0].n, to: stray[stray.length - 1].n, plates: stray });
+const sectionRange = sec => sec.plates.length === 1 ? `Plate ${pad(sec.plates[0].n)}` : `Plates ${pad(sec.plates[0].n)}\u2013${pad(sec.plates[sec.plates.length - 1].n)}`;
 
-// Build home grid
-PLATES.forEach(p => {
-  const card = document.createElement('div');
-  card.className = 'plate-card' + (p.ready ? '' : ' disabled');
-  card.dataset.search = (p.title + ' ' + p.desc).toLowerCase();
-  card.innerHTML = `
+// Build sidebar (collapsible groups) and home grid (one heading + grid per section)
+sectionsInUse.forEach(sec => {
+  if (!sec.plates.length) return;
+  const range = sectionRange(sec);
+
+  const group = document.createElement('div');
+  group.className = 'plate-group';
+  group.dataset.section = sec.id;
+  const head = document.createElement('button');
+  head.type = 'button';
+  head.className = 'group-head';
+  head.setAttribute('aria-expanded', 'true');
+  head.innerHTML = `<span class="group-chev">\u25BE</span><span class="group-text"><span class="group-title">${sec.title}</span><span class="group-range">${range}</span></span>`;
+  const body = document.createElement('div');
+  body.className = 'group-body';
+  head.addEventListener('click', () => {
+    const collapsed = group.classList.toggle('collapsed');
+    head.setAttribute('aria-expanded', collapsed ? 'false' : 'true');
+  });
+  group.appendChild(head);
+  group.appendChild(body);
+  sidebarList.appendChild(group);
+
+  const block = document.createElement('section');
+  block.className = 'section-block';
+  block.dataset.section = sec.id;
+  block.innerHTML = `<h4 class="section-heading"><span class="sec-title">${sec.title}</span><span class="sec-range">${range}</span></h4>`;
+  const secGrid = document.createElement('div');
+  secGrid.className = 'plate-grid';
+  block.appendChild(secGrid);
+  grid.appendChild(block);
+
+  sec.plates.forEach(p => {
+    const searchText = (p.title + ' ' + p.desc + ' ' + sec.title).toLowerCase();
+
+    const el = document.createElement('div');
+    el.className = 'plate-link' + (p.ready ? '' : ' disabled');
+    el.dataset.slug = p.slug;
+    el.dataset.search = searchText;
+    el.innerHTML = `<span class="plate-num">${pad(p.n)}</span><span class="plate-title">${p.title}</span>`;
+    if (p.ready) {
+      el.addEventListener('click', () => { location.hash = p.slug; closeMobileSidebar(); });
+    }
+    body.appendChild(el);
+
+    const card = document.createElement('div');
+    card.className = 'plate-card' + (p.ready ? '' : ' disabled');
+    card.dataset.search = searchText;
+    card.innerHTML = `
     <img class="plate-thumb" src="${makeThumb(p.n, p.ready)}" alt="">
     <div class="plate-card-body">
       <div class="plate-card-num">SHEET ${pad(p.n)}/22</div>
@@ -482,10 +557,11 @@ PLATES.forEach(p => {
       <span class="status-tag ${p.ready ? 'ready' : 'pending'}">${p.ready ? 'Available' : 'Coming soon'}</span>
     </div>
   `;
-  if (p.ready) {
-    card.addEventListener('click', () => { location.hash = p.slug; });
-  }
-  grid.appendChild(card);
+    if (p.ready) {
+      card.addEventListener('click', () => { location.hash = p.slug; });
+    }
+    secGrid.appendChild(card);
+  });
 });
 
 function showHome() {
@@ -520,6 +596,13 @@ function showPlate(plate) {
   document.querySelectorAll('.plate-link').forEach(el => {
     el.classList.toggle('active', el.dataset.slug === plate.slug);
   });
+  const activeLink = document.querySelector('.plate-link.active');
+  const activeGroup = activeLink && activeLink.closest('.plate-group');
+  if (activeGroup) {
+    activeGroup.classList.remove('collapsed');
+    const gh = activeGroup.querySelector('.group-head');
+    if (gh) gh.setAttribute('aria-expanded', 'true');
+  }
   const readyPlates = PLATES.filter(p => p.ready);
   const idx = readyPlates.findIndex(p => p.slug === plate.slug);
   prevBtn.disabled = idx <= 0;
@@ -556,6 +639,13 @@ function applyFilter(term) {
   document.querySelectorAll('.plate-card').forEach(el => {
     el.classList.toggle('hide', term && !el.dataset.search.includes(term));
   });
+  document.querySelectorAll('.plate-group').forEach(g => {
+    g.classList.toggle('hide', !g.querySelector('.plate-link:not(.hide)'));
+  });
+  document.querySelectorAll('.section-block').forEach(b => {
+    b.classList.toggle('hide', !b.querySelector('.plate-card:not(.hide)'));
+  });
+  sidebarList.classList.toggle('filtering', !!term);
 }
 const sidebarFilter = document.getElementById('sidebar-filter');
 const homeSearch = document.getElementById('home-search');
