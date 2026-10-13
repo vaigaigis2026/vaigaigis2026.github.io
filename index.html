@@ -55,6 +55,27 @@
   .pill-btn:focus-visible, button:focus-visible, input:focus-visible, [tabindex]:focus-visible {
     outline: 2px solid var(--accent); outline-offset: 2px;
   }
+  .export-dropdown { position: relative; }
+  .export-dropdown .pill-btn:disabled {
+    opacity: 0.45; cursor: not-allowed;
+  }
+  .export-menu {
+    position: absolute; top: calc(100% + 6px); right: 0; z-index: 1300;
+    min-width: 160px; background: var(--panel); border: 1px solid var(--line);
+    border-radius: 4px; box-shadow: 0 8px 24px rgba(0,0,0,0.4); padding: 6px;
+    display: flex; flex-direction: column; gap: 4px;
+  }
+  .export-menu[hidden] { display: none !important; }
+  .export-menu button {
+    background: transparent; border: 1px solid transparent; color: var(--ink);
+    font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.4px;
+    text-transform: uppercase; text-align: left; padding: 8px 10px; border-radius: 3px;
+    cursor: pointer;
+  }
+  .export-menu button:hover {
+    border-color: var(--accent); color: var(--accent); background: rgba(201,155,83,0.08);
+  }
+  .export-menu button:disabled { opacity: 0.5; cursor: wait; }
 
   /* ---------- About panel ---------- */
   #about-panel {
@@ -370,7 +391,14 @@
         <p class="subtitle">Settlement Dynamics and Environmental Determinants of the Vaigai Valley — Interactive Map Series</p>
       </div>
       <div class="header-actions">
-        <button class="pill-btn" id="menu-toggle">☰ Plates</button>
+        <button class="pill-btn" id="menu-toggle" title="Open plate list">☰</button>
+        <div class="export-dropdown" id="export-dropdown">
+          <button class="pill-btn" id="export-map-btn" type="button" disabled title="Open a map plate first">Export map ▾</button>
+          <div class="export-menu" id="export-menu" hidden>
+            <button type="button" data-export="png">Export PNG</button>
+            <button type="button" data-export="pdf">Export PDF</button>
+          </div>
+        </div>
         <button class="pill-btn" id="key-findings-header">Key Findings</button>
         <button class="pill-btn" id="about-toggle">About / Credits</button>
       </div>
@@ -505,7 +533,6 @@
   }
   function injectAll() {
     injectIntoMap('site-labels-injected', 'site-labels.js', 'site-labels');
-    injectIntoMap('map-export-injected', 'map-export.js', 'map-export');
   }
   var frame = document.getElementById('mapFrame');
   if (frame) {
@@ -1556,6 +1583,186 @@ document.getElementById('menu-toggle').addEventListener('click', () => {
 function closeMobileSidebar() {
   if (window.innerWidth <= 760) sidebarEl.classList.remove('open');
 }
+
+// ---------- Header Export map (PNG / PDF) ----------
+(function () {
+  const exportBtn = document.getElementById('export-map-btn');
+  const exportMenu = document.getElementById('export-menu');
+  const exportDropdown = document.getElementById('export-dropdown');
+  if (!exportBtn || !exportMenu) return;
+
+  const CDN_HTML2CANVAS = 'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js';
+  const CDN_JSPDF = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';
+
+  function loadScript(src, ready) {
+    return new Promise((resolve, reject) => {
+      if (ready()) return resolve();
+      let s = document.querySelector('script[data-export-lib="' + src + '"]');
+      if (s) {
+        let n = 0;
+        (function wait() {
+          if (ready()) return resolve();
+          if (++n > 50) return reject(new Error('timeout ' + src));
+          setTimeout(wait, 100);
+        })();
+        return;
+      }
+      s = document.createElement('script');
+      s.src = src;
+      s.async = true;
+      s.setAttribute('data-export-lib', src);
+      s.onload = () => resolve();
+      s.onerror = () => reject(new Error('failed ' + src));
+      document.head.appendChild(s);
+    });
+  }
+
+  function ensureLibs() {
+    return loadScript(CDN_HTML2CANVAS, () => !!window.html2canvas)
+      .then(() => loadScript(CDN_JSPDF, () => !!(window.jspdf || window.jsPDF)));
+  }
+
+  function plateIsOpen() {
+    return !!(mapFrame && mapFrame.style.display !== 'none' && mapFrame.src);
+  }
+
+  function syncExportEnabled() {
+    const on = plateIsOpen();
+    exportBtn.disabled = !on;
+    exportBtn.title = on ? 'Download the current map view' : 'Open a map plate first';
+    if (!on) exportMenu.hidden = true;
+  }
+
+  // Keep enabled state in sync with routing
+  const _showPlate = window.showPlate;
+  // showPlate is in outer scope; observe hash + iframe display
+  window.addEventListener('hashchange', () => setTimeout(syncExportEnabled, 50));
+  mapFrame.addEventListener('load', syncExportEnabled);
+  setInterval(syncExportEnabled, 800);
+  syncExportEnabled();
+
+  exportBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    if (exportBtn.disabled) return;
+    exportMenu.hidden = !exportMenu.hidden;
+  });
+  document.addEventListener('click', (e) => {
+    if (!exportDropdown.contains(e.target)) exportMenu.hidden = true;
+  });
+
+  function currentPlateName() {
+    const slug = location.hash.replace(/^#/, '');
+    const plate = PLATES.find(p => p.slug === slug);
+    if (plate) return ('Sheet_' + String(plate.n).padStart(2, '0') + '_' + plate.slug);
+    return 'Vaigai_map_plate';
+  }
+
+  function findCaptureTarget(doc) {
+    return doc.querySelector('#map')
+      || doc.querySelector('.leaflet-container')
+      || doc.querySelector('.maplibregl-map')
+      || doc.querySelector('[id*="map"]')
+      || doc.body;
+  }
+
+  async function captureMapCanvas() {
+    let doc, win;
+    try {
+      doc = mapFrame.contentDocument;
+      win = mapFrame.contentWindow;
+    } catch (e) {
+      throw new Error('Cannot access map frame (cross-origin?). Serve atlas and maps from the same site.');
+    }
+    if (!doc || !win) throw new Error('Map frame not ready.');
+
+    // Prefer html2canvas from parent; it can still draw same-origin iframe content if we pass the element
+    const target = findCaptureTarget(doc);
+    const scale = Math.min(3, Math.max(2, window.devicePixelRatio || 2));
+
+    // Temporarily hide any leftover export UI inside the plate
+    const hideEls = doc.querySelectorAll('#vaigai-export-bar, [data-vaigai-export]');
+    const prev = [];
+    hideEls.forEach((el, i) => { prev[i] = el.style.display; el.style.display = 'none'; });
+
+    try {
+      const canvas = await window.html2canvas(target, {
+        scale: scale,
+        useCORS: true,
+        allowTaint: true,
+        backgroundColor: '#0d2038',
+        logging: false,
+        imageTimeout: 20000,
+        width: target.scrollWidth || target.clientWidth,
+        height: target.scrollHeight || target.clientHeight,
+        windowWidth: win.innerWidth,
+        windowHeight: win.innerHeight
+      });
+      return canvas;
+    } finally {
+      hideEls.forEach((el, i) => { el.style.display = prev[i] || ''; });
+    }
+  }
+
+  function downloadPng(canvas) {
+    const a = document.createElement('a');
+    a.download = currentPlateName() + '_highres.png';
+    a.href = canvas.toDataURL('image/png');
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+  }
+
+  function downloadPdf(canvas) {
+    const jsPDF = (window.jspdf && window.jspdf.jsPDF) || window.jsPDF;
+    if (!jsPDF) throw new Error('jsPDF not available');
+    const img = canvas.toDataURL('image/png');
+    const orient = canvas.width >= canvas.height ? 'landscape' : 'portrait';
+    const pdf = new jsPDF({ orientation: orient, unit: 'mm', format: 'a3' });
+    const pageW = pdf.internal.pageSize.getWidth();
+    const pageH = pdf.internal.pageSize.getHeight();
+    const margin = 8;
+    const maxW = pageW - margin * 2;
+    const maxH = pageH - margin * 2 - 10;
+    const ratio = Math.min(maxW / canvas.width, maxH / canvas.height);
+    const w = canvas.width * ratio;
+    const h = canvas.height * ratio;
+    const x = (pageW - w) / 2;
+    const y = margin + 6;
+    const plate = PLATES.find(p => p.slug === location.hash.replace(/^#/, ''));
+    const title = plate ? ('Sheet ' + String(plate.n).padStart(2, '0') + ' — ' + plate.title) : (document.title || 'Vaigai Valley Map');
+    pdf.setFontSize(10);
+    pdf.setTextColor(40);
+    pdf.text(title, margin, margin + 3);
+    pdf.addImage(img, 'PNG', x, y, w, h);
+    pdf.save(currentPlateName() + '_highres.pdf');
+  }
+
+  async function runExport(kind) {
+    const buttons = exportMenu.querySelectorAll('button');
+    buttons.forEach(b => { b.disabled = true; });
+    exportBtn.textContent = 'Exporting…';
+    exportMenu.hidden = true;
+    try {
+      await ensureLibs();
+      const canvas = await captureMapCanvas();
+      if (kind === 'png') downloadPng(canvas);
+      else downloadPdf(canvas);
+    } catch (err) {
+      console.error('[export]', err);
+      alert('Could not export the map.\n\n' + (err && err.message ? err.message : err));
+    } finally {
+      buttons.forEach(b => { b.disabled = false; });
+      exportBtn.textContent = 'Export map ▾';
+      syncExportEnabled();
+    }
+  }
+
+  exportMenu.addEventListener('click', (e) => {
+    const btn = e.target.closest('button[data-export]');
+    if (!btn) return;
+    runExport(btn.getAttribute('data-export'));
+  });
+})();
 </script>
 </body>
 </html>
