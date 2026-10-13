@@ -214,6 +214,132 @@
   #plate-topbar .nav-btn:hover:not(:disabled) { border-color: var(--accent); color: var(--accent); }
   #plate-topbar .nav-btn:disabled { opacity:.3; cursor:default; }
   #plate-topbar .flex-spacer { flex:1; }
+  #plate-topbar .nav-btn.key-findings-btn {
+    width:auto; padding:0 12px; font-family:var(--font-mono); text-transform:uppercase; letter-spacing:.5px; font-weight:700;
+    background: transparent; border-color: var(--accent); color: var(--accent);
+  }
+  #plate-topbar .nav-btn.key-findings-btn:hover:not(:disabled) {
+    background: var(--accent); border-color: var(--accent); color: #1a0f00;
+  }
+
+  /* ---------- Key Findings view ---------- */
+  #findings-view { padding: 40px 44px; max-width: 1080px; margin: 0 auto; display:none; }
+  #findings-view.show { display:block; }
+  .findings-intro { margin-bottom: 28px; }
+  .findings-intro .intro-eyebrow { margin-bottom: 8px; }
+  .findings-intro .intro-title { font-size: 28px; margin-bottom: 10px; }
+  .findings-intro .intro-meta { margin-bottom: 0; }
+  .findings-card {
+    position:relative; background: var(--panel); border: 1px solid var(--line); border-radius: 4px;
+    padding: 0; cursor:pointer; overflow:hidden;
+    transition: transform .15s ease, border-color .15s ease, box-shadow .15s ease;
+  }
+  .findings-card:hover { transform: translateY(-2px); border-color: var(--accent); box-shadow: 0 6px 18px rgba(0,0,0,0.35); }
+  .findings-card.hide { display:none; }
+  .findings-card .plate-card-body { padding: 14px 16px 16px; }
+  .findings-card .plate-card-num { font-family: var(--font-mono); font-size: 10.5px; letter-spacing: 1.5px; color: var(--accent); margin-bottom: 6px; }
+  .findings-card h4 { margin: 0 0 6px; font-family: var(--font-head); font-size: 15px; font-weight:700; text-transform:uppercase; letter-spacing:.2px; line-height:1.25; color: var(--ink); }
+  .findings-card p { margin:0; font-family: var(--font-body); font-size: 12px; color: var(--ink-dim); line-height:1.5; }
+  .findings-card .status-tag {
+    display:inline-block; margin-top:10px; font-family: var(--font-mono); font-size: 10px;
+    text-transform:uppercase; letter-spacing: 1px; padding: 2px 8px; border-radius: 2px; border: 1px solid;
+  }
+  .findings-card .status-tag.ready { border-color:#4f8fa6; color:#8fc2d6; }
+  .findings-card .status-tag.pending { border-color:#5a7186; color:#8098ac; }
+
+  /* Key Findings detail (single plate) */
+  #findings-detail { display:none; padding: 32px 44px 48px; max-width: 820px; margin: 0 auto; }
+  #findings-detail.show { display:block; }
+  .findings-back {
+    display:inline-flex; align-items:center; gap:6px; font-family: var(--font-mono); font-size: 11.5px;
+    letter-spacing: .5px; text-transform:uppercase; color: var(--accent); cursor:pointer; margin-bottom: 18px;
+    background:none; border:none; padding:0;
+  }
+  .findings-back:hover { text-decoration: underline; }
+  .findings-detail-header { margin-bottom: 22px; padding-bottom: 16px; border-bottom: 1px solid var(--line); }
+  .findings-detail-header .sheet-num {
+    font-family: var(--font-mono); font-size: 11px; letter-spacing: 1.5px; color: var(--accent); margin-bottom: 6px;
+  }
+  .findings-detail-header h2 {
+    font-family: var(--font-head); font-size: 22px; font-weight:700; text-transform:uppercase;
+    letter-spacing:.3px; margin:0 0 8px; line-height:1.25; color: var(--ink);
+  }
+  .findings-detail-header .plate-desc { font-size: 13px; color: var(--ink-dim); line-height:1.55; margin:0; }
+  .findings-content { font-size: 13.5px; line-height:1.7; color: var(--ink-dim); }
+  .findings-content h3 {
+    font-family: var(--font-head); font-size: 15px; font-weight:700; text-transform:uppercase;
+    letter-spacing:.3px; color: var(--accent); margin: 22px 0 8px; padding-top: 4px;
+  }
+  .findings-content h3:first-child { margin-top: 0; }
+  .findings-content p { margin: 0 0 12px; }
+  .findings-content ul {
+    margin: 0 0 16px;
+    padding-left: 1.35em;   /* ~0.5rem extra visual indent beyond default */
+    list-style-type: disc;
+  }
+  .findings-content li {
+    margin-bottom: 7px;
+    padding-left: 0.35em;
+  }
+  .findings-content li::marker {
+    color: var(--accent);
+  }
+  .findings-formula {
+    background: var(--panel);
+    border: 1px solid var(--accent);
+    border-radius: 4px;
+    padding: 14px 16px;
+    margin: 0 0 18px;
+  }
+  .findings-formula .formula-main {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    color: var(--ink);
+    margin: 0 0 12px;
+    line-height: 1.5;
+    word-break: break-word;
+  }
+  .findings-formula .formula-breakdown {
+    margin: 0;
+    padding-left: 1.2em;
+  }
+  .findings-formula .formula-breakdown li {
+    margin-bottom: 4px;
+    font-size: 12.5px;
+  }
+  .findings-table-wrap {
+    overflow-x: auto;
+    margin: 0 0 18px;
+    border: 1px solid var(--line);
+    border-radius: 4px;
+  }
+  .findings-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+    font-family: var(--font-mono);
+  }
+  .findings-table th {
+    background: var(--panel);
+    color: var(--accent);
+    text-align: left;
+    padding: 8px 10px;
+    border-bottom: 1px solid var(--line);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-size: 10.5px;
+  }
+  .findings-table td {
+    padding: 6px 10px;
+    border-bottom: 1px solid var(--line-soft);
+    color: var(--ink-dim);
+  }
+  .findings-table tr:last-child td { border-bottom: none; }
+  .findings-table tr:nth-child(even) td { background: rgba(15, 39, 64, 0.45); }
+  .findings-placeholder {
+    background: var(--panel); border: 1px dashed var(--line); border-radius: 4px;
+    padding: 28px 24px; text-align:center; color: var(--muted); font-family: var(--font-mono); font-size: 13px;
+  }
 
   /* ---------- Mobile ---------- */
   @media (max-width: 760px) {
@@ -223,14 +349,14 @@
       box-shadow: 4px 0 20px rgba(0,0,0,0.4);
     }
     #sidebar.open { transform: translateX(0); }
-    #home-view { padding: 26px 18px; }
+    #home-view, #findings-view, #findings-detail { padding: 26px 18px; }
     .intro-title { font-size: 24px; }
     #about-panel { right: 12px; left: 12px; width:auto; }
     .plates-heading { flex-direction:column; align-items:flex-start; gap:8px; }
     #home-search { width:100%; }
   }
   @media (prefers-reduced-motion: reduce) {
-    #sidebar, .plate-card, #home-view { transition: none; }
+    #sidebar, .plate-card, #home-view, .findings-card { transition: none; }
   }
 </style>
 </head>
@@ -245,6 +371,7 @@
       </div>
       <div class="header-actions">
         <button class="pill-btn" id="menu-toggle">☰ Plates</button>
+        <button class="pill-btn" id="key-findings-header">Key Findings</button>
         <button class="pill-btn" id="about-toggle">About / Credits</button>
       </div>
     </div>
@@ -267,7 +394,7 @@
     </div>
     <div class="about-row">
       <b>Data Sources</b>
-      Site Data: Balamurugan, P. (2016), "Historical Archaeology of the Vaigai Valley," PhD Thesis, Pondicherry University · Elevation: SRTM 30m (NASA/USGS) · River Network: HydroRIVERS (WWF)
+      Site Data: Balamurugan, P. (2016), "Historical Archaeology of the Vaigai Valley," PhD Thesis, Pondicherry University · Elevation: SRTM 30m (NASA/USGS) · Geology / Lithology / Geomorphology: National Geoscience Data Repository (NGDR) · Boundary &amp; river shapefiles: Bhukosh (GSI) and HydroSHEDS
     </div>
     <div class="about-row">
       <b>This Atlas</b>
@@ -305,6 +432,7 @@
         <span id="crumb-current"></span>
         <span class="flex-spacer"></span>
         <button class="nav-btn results-toggle" id="results-toggle" title="Show info graphics for this plate">Info Graphics</button>
+        <button class="nav-btn key-findings-btn" id="key-findings-plate" title="Open Key Findings for this plate">Key Findings</button>
         <button class="nav-btn" id="prev-plate" title="Previous plate">‹</button>
         <button class="nav-btn" id="next-plate" title="Next plate">›</button>
       </div>
@@ -325,6 +453,25 @@
       <div id="plate-body">
         <iframe id="mapFrame" title="Map plate viewer"></iframe>
         <div id="results-panel"><div id="results-panel-inner"></div></div>
+      </div>
+      <div id="findings-view">
+        <div class="findings-intro">
+          <div class="intro-eyebrow">Key Findings</div>
+          <h2 class="intro-title">Key Findings by Map Plate</h2>
+          <p class="intro-meta">
+            Structured findings drawn from the study’s GIS analysis. Select a plate to read the key observations for that theme. Plates are grouped using the same thematic sections as the atlas.
+          </p>
+        </div>
+        <div id="findings-grid"></div>
+      </div>
+      <div id="findings-detail">
+        <button class="findings-back" id="findings-back">← Back to Key Findings</button>
+        <div class="findings-detail-header">
+          <div class="sheet-num" id="findings-sheet-num"></div>
+          <h2 id="findings-detail-title"></h2>
+          <p class="plate-desc" id="findings-detail-desc"></p>
+        </div>
+        <div class="findings-content" id="findings-content"></div>
       </div>
     </div>
   </div>
@@ -384,10 +531,10 @@ const PLATES = [
   { n: 3,  slug: 'slope-gradient', title: 'Slope Gradient (Reclassified)', desc: 'Reclassified terrain slope across the Vaigai basin, with settlement distribution by slope class and filtering by cultural period.', file: 'maps/plate-03-slope-gradient.html', ready: true, v: 1 },
   { n: 4,  slug: 'plate-04', title: 'Slope Aspect & Settlement Distribution', desc: 'Topographic orientation (8-direction aspect, reclassified) with slope gradient toggle, settlement locations by cultural period, and boundary, river and district reference layers.', file: 'maps/plate-04-slope-aspect.html', ready: true, v: 1 },
   { n: 5,  slug: 'dem-hypsometric', title: 'DEM & Hypsometric Analysis', desc: 'Elevation zones from the 30m DEM with the Vaigai river and sub-tributary network, filterable by cultural group.', file: 'maps/plate-05-dem-hypsometric.html', ready: true, v: 2 },
-  { n: 6,  slug: 'geochronology', title: 'Geochronology', desc: 'Lithological and geochronological units (Bhukosh, GSI) across the Vaigai basin, with archaeological site distribution by rock unit and cultural period.', file: 'maps/plate-06-geochronology.html', ready: true, v: 1 },
-  { n: 7,  slug: 'lithology', title: 'Lithology', desc: 'Detailed lithological classification (50 rock/sediment types, Bhukosh GSI) across the Vaigai basin, with archaeological site distribution by rock type.', file: 'maps/plate-07-lithology.html', ready: true, v: 1 },
-  { n: 8,  slug: 'lithostratigraphy', title: 'Lithostratigraphy', desc: 'Named lithostratigraphic units and suites (13 classes, Bhukosh GSI) across the Vaigai basin, with archaeological site distribution by formation.', file: 'maps/plate-08-lithostratigraphy.html', ready: true, v: 1 },
-  { n: 9,  slug: 'geomorphology', title: 'Geomorphology', desc: 'Geomorphological units (Bhukosh/GSI) clipped to the Vaigai study area, with archaeological sites joined by landform type.', file: 'maps/plate-09-geomorphology.html', ready: true, v: 1 },
+  { n: 6,  slug: 'geochronology', title: 'Geochronology', desc: 'Lithological and geochronological units (NGDR) across the Vaigai basin, with archaeological site distribution by rock unit and cultural period. Boundary and river layers from Bhukosh (GSI) / HydroSHEDS.', file: 'maps/plate-06-geochronology.html', ready: true, v: 1 },
+  { n: 7,  slug: 'lithology', title: 'Lithology', desc: 'Detailed lithological classification (50 rock/sediment types, NGDR) across the Vaigai basin, with archaeological site distribution by rock type. Boundary and river layers from Bhukosh (GSI) / HydroSHEDS.', file: 'maps/plate-07-lithology.html', ready: true, v: 1 },
+  { n: 8,  slug: 'lithostratigraphy', title: 'Lithostratigraphy', desc: 'Named lithostratigraphic units and suites (13 classes, NGDR) across the Vaigai basin, with archaeological site distribution by formation. Boundary and river layers from Bhukosh (GSI) / HydroSHEDS.', file: 'maps/plate-08-lithostratigraphy.html', ready: true, v: 1 },
+  { n: 9,  slug: 'geomorphology', title: 'Geomorphology', desc: 'Geomorphological units (NGDR) clipped to the Vaigai study area, with archaeological sites joined by landform type. Boundary and river layers from Bhukosh (GSI) / HydroSHEDS.', file: 'maps/plate-09-geomorphology.html', ready: true, v: 1 },
   { n: 10, slug: 'lulc', title: 'Land Use / Land Cover', desc: 'INDIA-WRIS land use/land cover across the Vaigai basin, with archaeological sites joined to LULC class and filterable by cultural period.', file: 'maps/plate-10-lulc.html', ready: true, v: 1 },
   { n: 11, slug: 'soil-depth', title: 'Soil Depth Classification', desc: 'INDIA-WRIS soil depth classes across the Vaigai basin, with archaeological sites joined to depth class and filterable by cultural period.', file: 'maps/plate-11-soil-depth.html', ready: true, v: 1 },
   { n: 12, slug: 'soil-erosion', title: 'Soil Erosion', desc: 'Soil erosion vulnerability levels (Slight–Very severe) across the Vaigai basin, with archaeological sites joined to erosion class and filterable by cultural period.', file: 'maps/plate-12-soil-erosion.html', ready: true, v: 1 },
@@ -402,6 +549,639 @@ const PLATES = [
   { n: 21, slug: 'lcp-isotropic', title: 'Least Cost Path Analysis (Isotropic)', desc: 'Nine isotropic least-cost path corridors from origin sites to Aḻakaṉkuḷam with 2 km buffers, hillshade/SRTM/slope context, and site–corridor spatial joins.', file: 'maps/plate-21-lcp-isotropic.html', ready: true, v: 3 },
   { n: 22, slug: 'lcp-anisotropic', title: 'Least Cost Path Analysis (Anisotropic)', desc: 'Nine anisotropic least-cost path corridors from origin sites to Aḻakaṉkuḷam with 2 km buffers, hillshade/SRTM/slope context, and site–corridor spatial joins.', file: 'maps/plate-22-lcp-anisotropic.html', ready: true, v: 2 },
 ];
+
+// ---------------------------------------------------------------
+// KEY FINDINGS content (closer to original PPT wording)
+// Plates 1–4 have real content; 5–22 use a placeholder.
+// ---------------------------------------------------------------
+const KEY_FINDINGS = {
+  'site-distribution': {
+    html: `
+      <h3>Study Area Extent &amp; Spatial Framework</h3>
+      <ul>
+        <li>The Vaigai basin study area covers <b>12,758.89 sq. km</b> across five districts (Theni, Dindigul, Madurai, Sivagangai, and Ramanathapuram), standardized in WGS 1984 UTM Zone 44N with a total relief of <b>2,665 m</b>.</li>
+      </ul>
+      <h3>Three Distinct Physiographic Zones</h3>
+      <ul>
+        <li>The valley spans the rugged Western Ghats headwaters in the west, the central agricultural Vaigai Alluvial Plain (Madurai/Sivagangai corridor), and the low-lying southeastern coastal plain of Ramanathapuram.</li>
+      </ul>
+      <h3>Hydrological Network &amp; Tributary Confluences</h3>
+      <ul>
+        <li>The primary drainage axis of the Vaigai and its nine major sub-basins (including the Suruliar, Manjalar, and Varahanadhi) create crucial confluences that form nodes of heightened water availability and alluvial soil deposition.</li>
+      </ul>
+      <h3>Dominance of Iron Age Settlements</h3>
+      <ul>
+        <li>Out of the <b>338</b> analyzed archaeological sites, Iron Age settlements form the vast majority at <b>64.50% (n = 218)</b>, showing dense clustering around Madurai and along the main channel and tributaries within the alluvial plain.</li>
+      </ul>
+      <h3>Chronological Expansion toward the Coast</h3>
+      <ul>
+        <li>While Pre-Iron Age sites (<b>12.13%</b> combined transitional/single) tend toward elevated foothill margins, Early Historic (<b>8.28%</b>) and Historical (<b>7.69%</b>) sites expand eastward toward the Ramanathapuram coast, reflecting the development of wider exchange networks.</li>
+      </ul>
+    `
+  },
+  'contour-elevation': {
+    html: `
+      <h3>Massive Elevation Range</h3>
+      <ul>
+        <li>The study area spans a huge vertical difference of <b>2,665 meters</b>, starting from below sea level (<b>−16 m</b>) near the coast up to <b>2,649 meters</b> high in the Western Ghats peaks.</li>
+      </ul>
+      <h3>Six Elevation Zones</h3>
+      <ul>
+        <li>The landscape is divided into six distinct elevation bands to help analyze where sites are located, using a custom 25-meter mark to accurately map the narrow coastal strip.</li>
+      </ul>
+      <h3>The Main Settlement Core (100–500 m)</h3>
+      <ul>
+        <li>Over two-thirds of all sites (<b>66.9%</b>, or <b>226 sites</b>) are found in the Upper Alluvial Plain, suggesting that ancient communities heavily favored this mid-elevation zone across multiple time periods.</li>
+      </ul>
+      <h3>Secondary Lowland Expansion (25–100 m)</h3>
+      <ul>
+        <li>The Lower Alluvial Plain holds about <b>20.4%</b> of the sites (<b>69 sites</b>), meaning that combined, the alluvial plains account for the vast majority (<b>87.3%</b>) of all recorded settlements in the valley.</li>
+      </ul>
+      <h3>Contrasting Mountain and Coastal Frontiers</h3>
+      <ul>
+        <li>While low coastal areas show a small, steady presence that may relate to trade, the Lower Western Ghats show a sharp spike in sites strictly during the Iron Age (<b>18 out of 21 sites</b>).</li>
+        <li>Because this is based on surface mapping, GIS data strongly points to a pattern of seasonal or temporary highland use rather than permanent year-round villages, though further digs would be needed to confirm this.</li>
+      </ul>
+    `
+  },
+  'slope-gradient': {
+    html: `
+      <h3>Dominance of Low-Gradient Land</h3>
+      <ul>
+        <li>Over three-quarters of the entire study area (<b>78.7%</b>) consists of flat or gently sloping land, dominated by the valley’s alluvial plains.</li>
+      </ul>
+      <h3>Strong Preference for Flat Areas</h3>
+      <ul>
+        <li>A large majority of all recorded sites—<b>85.5% (289 out of 338)</b>—are located on flat (0–2°) or gentle (2–5°) slopes, suggesting that ancient communities generally preferred level ground for daily living and farming.</li>
+      </ul>
+      <h3>Pre-Iron Age Lowland Concentration</h3>
+      <ul>
+        <li>Pre-Iron Age sites are found almost exclusively on flat and gentle terrain, showing little to no presence on higher or steeper slopes.</li>
+      </ul>
+      <h3>Iron Age Expansion into Higher Slopes</h3>
+      <ul>
+        <li>During the Iron Age, settlements expanded into a wider variety of slope classes, with <b>15.4%</b> of sites located on moderate to very steep terrain, which GIS data suggests may relate to specialized resource use or defensive placement rather than permanent living quarters.</li>
+      </ul>
+      <h3>Return to Lowlands in Later Periods</h3>
+      <ul>
+        <li>During the Early Historic and Historical periods, settlement preferences leaned back toward lower-gradient, flat plains (accounting for up to <b>92.4%</b> of historical sites), which is consistent with a growing focus on lowland wet-paddy agriculture.</li>
+      </ul>
+    `
+  },
+  'plate-04': {
+    html: `
+      <h3>Equitable Landscape Distribution</h3>
+      <ul>
+        <li>Unlike slope steepness, the terrain’s aspect (compass direction slopes face) is distributed very evenly across the study area, with each direction covering between <b>11.8%</b> and <b>13.0%</b> of the land.</li>
+      </ul>
+      <h3>Equatorial Solar Reality</h3>
+      <ul>
+        <li>Because the Vaigai Valley sits close to the equator (<b>9°15′N to 10°20′N</b>), the sun passes overhead twice a year, minimizing the extreme temperature differences between north- and south-facing slopes found in cooler, mid-latitude countries.</li>
+      </ul>
+      <h3>Pre-Iron Age Directional Clustering</h3>
+      <ul>
+        <li>Early Pre-Iron Age sites show a heavier concentration on South- and South-West-facing slopes (<b>39.5%</b> of sites combined), which could suggest a preference for higher solar-gain terrain, though GIS surface data can only point to this pattern rather than confirm the exact community motives.</li>
+      </ul>
+      <h3>Moderate Spread During the Iron Age</h3>
+      <ul>
+        <li>During the Iron Age, settlements spread out across a wider variety of slope directions while still maintaining a mild preference for South- and North-facing slopes, suggesting a more diverse use of the landscape.</li>
+      </ul>
+      <h3>Shifting Orientation in Later Periods</h3>
+      <ul>
+        <li>While Early Historic sites leaned back toward South/North orientations, the later Historical phase shifted toward East, North-East, and West slopes.</li>
+        <li>Because aspect preference changes over time rather than staying fixed, GIS analysis suggests that aspect was likely a secondary factor, with other influences like water proximity and trade routes playing a more significant role in where people chose to build.</li>
+      </ul>
+    `
+  },
+  'dem-hypsometric': {
+    html: `
+      <h3>Old Geomorphic Landscape</h3>
+      <ul>
+        <li>The calculated Hypsometric Integral (HI) value of <b>0.1146</b> places the Vaigai Valley in the "Old" (Monadnock) stage, indicating a long-eroded landscape featuring wide, stable, and flat alluvial plains.</li>
+      </ul>
+      <h3>Core Settlement Concentration</h3>
+      <ul>
+        <li>Over two-thirds of all recorded sites (<b>66.86%</b>, or <b>226 out of 338 sites</b>) are clustered in Zone 4 (the 100–500 m Upper Alluvial Plain), which makes up <b>50.26%</b> of the total basin area.</li>
+      </ul>
+      <h3>Avoidance of Extreme Elevations</h3>
+      <ul>
+        <li>Sites are heavily underrepresented in coastal areas (Zone 2) and lower Western Ghats (Zone 5), while the highest mountain zone (Zone 6) contains only <b>0.3%</b> of the sites, suggesting that ancient communities generally avoided extreme high and low terrain.</li>
+      </ul>
+      <h3>Lower Average Site Elevation</h3>
+      <ul>
+        <li>The overall mean elevation of all archaeological sites is <b>235.58 m</b>, which sits <b>53.70 m</b> lower than the regional basin average (<b>289.28 m</b>), showing a general preference for lower-lying land.</li>
+      </ul>
+      <h3>Shifting Elevation Means Across Periods</h3>
+      <ul>
+        <li>The average site elevation varies across cultural phases—starting lowest during the Pre-Iron Age (<b>127.62 m</b>), rising during the Iron Age (<b>261.04 m</b>), and dropping back down in the Early Historic period (<b>160.79 m</b>).</li>
+        <li>Because this is based on surface data and sample sizes vary, GIS analysis points to these shifts as a descriptive pattern of changing landscape use rather than proven population movements.</li>
+      </ul>
+    `
+  },
+  'geochronology': {
+    html: `
+      <h3>Domination of Two Age Classes</h3>
+      <ul>
+        <li>Over <b>92%</b> of all <b>338</b> archaeological sites are concentrated in just two geological age classes: the ancient Archaean-Proterozoic basement and the young Meghalayan alluvium.</li>
+      </ul>
+      <h3>Unexpected Preference for Ancient Basement Rocks</h3>
+      <ul>
+        <li>Around <b>61%</b> of all sites (<b>207 sites</b>) are found on the Archaean-Proterozoic crystalline basement.</li>
+        <li>Because these rocks are hard and typically produce thin soils, GIS data suggests that ancient communities likely valued this older terrain for flood safety, long-term landscape stability, and access to stone resources rather than deep agricultural soils.</li>
+      </ul>
+      <h3>Agricultural Importance of Late Holocene Alluvium</h3>
+      <ul>
+        <li>The Meghalayan age class contains <b>31%</b> of all sites (<b>106 sites</b>), representing unconsolidated, fertile alluvial sediments deposited by the Vaigai River that likely served as the valley's primary agricultural base.</li>
+      </ul>
+      <h3>Iron Age Dominance Across Formations</h3>
+      <ul>
+        <li>The Iron Age group is the largest contributor on both major geological formations, accounting for <b>153 sites</b> on the basement and <b>76 sites</b> on the Meghalayan alluvium.</li>
+      </ul>
+      <h3>Possible Dual Settlement Strategy</h3>
+      <ul>
+        <li>The strong presence of sites across both ancient bedrock and recent alluvium points to a possible dual strategy, where communities placed permanent homes on stable, elevated basement ground while utilizing nearby alluvial plains for farming.</li>
+      </ul>
+    `
+  },
+  'lithology': {
+    html: `
+      <h3>Domination of Crystalline Rocks and Alluvium</h3>
+      <ul>
+        <li>The Vaigai Valley contains <b>50</b> distinct rock and sediment types, but is overwhelmingly dominated by just three: Acid to Intermediate Charnockite (<b>33.82%</b>), Black Silty Clay active floodplains (<b>22.66%</b>), and Hornblende-Biotite Gneiss (<b>17.30%</b>).</li>
+      </ul>
+      <h3>Pre-Iron Age Preference for Charnockite</h3>
+      <ul>
+        <li>Early Pre-Iron Age sites show a heavy concentration on charnockite terrain (<b>60.5%</b> of sites), which GIS surface data indicates may reflect a preference for elevated, stable crystalline bedrock and stone resources.</li>
+      </ul>
+      <h3>Shift Toward Alluvial Floodplains Over Time</h3>
+      <ul>
+        <li>The proportion of sites located on active floodplain clay increases across periods, rising from <b>18.6%</b> in the Pre-Iron Age to <b>24.9%</b> in the Iron Age, and reaching <b>27.8%</b> in the Early Historic-Historical period.</li>
+      </ul>
+      <h3>Broadening Lithological Diversity</h3>
+      <ul>
+        <li>The number of different rock and sediment types utilized by ancient communities expands over time, moving from <b>9</b> types in the Pre-Iron Age to <b>13</b> during the Iron Age, and <b>14</b> in the later periods.</li>
+      </ul>
+      <h3>Descriptive Transition Pattern</h3>
+      <ul>
+        <li>While GIS data clearly shows a progressive shift from crystalline terrain toward alluvial floodplain settings, researchers note that this is a descriptive trend; confirming exact causes like agricultural changes or population growth requires independent environmental and artifactual evidence.</li>
+      </ul>
+    `
+  },
+  'lithostratigraphy': {
+    html: `
+      <h3>Domination of Crystalline and Alluvial Formations</h3>
+      <ul>
+        <li>The valley's geology is heavily dominated by crystalline basement rocks like Charnockite (<b>33.85%</b>) and Migmatite (<b>22.13%</b>), alongside recent Active Fluvial Deposits (<b>26.21%</b>), which together make up over <b>80%</b> of the study area.</li>
+      </ul>
+      <h3>High Site Concentration on Charnockite</h3>
+      <ul>
+        <li>Charnockite hosts the largest number of sites at <b>42.0% (142 out of 338 sites)</b>, showing a strong presence across multiple periods, which GIS data indicates may relate to durable stone availability and stable elevated terrain.</li>
+      </ul>
+      <h3>Pre-Iron Age and Iron Age Charnockite Preference</h3>
+      <ul>
+        <li>During the Pre-Iron Age, <b>60.5%</b> of sites were located on Charnockite, and it remained the leading group during the Iron Age (<b>43.6%</b> of sites), pointing to long-term continuity of settlement on this bedrock.</li>
+      </ul>
+      <h3>Shift Toward Alluvial and Migmatite Terrains Over Time</h3>
+      <ul>
+        <li>Site distributions change in later periods, with Migmatite leading during the Early Historic phase (<b>32.1%</b> of sites) and Active Fluvial Deposits becoming the leading group in the Historical phase (<b>46.2%</b> of sites).</li>
+      </ul>
+      <h3>Descriptive Chronological Shift</h3>
+      <ul>
+        <li>While the data clearly maps a progressive shift from ancient crystalline basement rocks toward riverine alluvial plains over time, researchers note that this is a descriptive trend; confirming exact socio-economic drivers requires independent archaeological evidence.</li>
+      </ul>
+    `
+  },
+  'geomorphology': {
+    html: `
+      <h3>Domination of the Pediment Pediplain</h3>
+      <ul>
+        <li>The Pediment Pediplain Complex covers nearly <b>40%</b> of the entire study area and serves as the primary landscape across all cultural periods, hosting <b>45%</b> of all recorded sites.</li>
+      </ul>
+      <h3>Pre-Iron Age Pediplain Concentration</h3>
+      <ul>
+        <li>During the Pre-Iron Age, <b>65.1%</b> of sites (<b>28 out of 43</b>) were concentrated in the Pediment Pediplain Complex, with very few sites found in hill or floodplain settings.</li>
+      </ul>
+      <h3>Iron Age Broadening into Hills and Floodplains</h3>
+      <ul>
+        <li>The Iron Age group shows the widest landscape usage across <b>12</b> distinct geomorphic units, marking the first recorded appearance of sites in hilly terrain (such as highly dissected structural hills) and active floodplains.</li>
+      </ul>
+      <h3>Early Historic and Historical Lowland Shift</h3>
+      <ul>
+        <li>In later periods, settlement presence in rugged hilly areas dropped sharply, while occupation of alluvial and deltaic plains remained strong, alongside the first appearance of specialized sites like ponds and quarries.</li>
+      </ul>
+      <h3>Descriptive Landscape Progression</h3>
+      <ul>
+        <li>While GIS data clearly shows a progressive expansion from a concentrated pediplain setting toward a more diverse range of landforms over time, researchers note that these counts are descriptive trends; confirming exact socioeconomic reasons requires independent archaeological evidence.</li>
+      </ul>
+    `
+  },
+  'lulc': {
+    html: `
+      <h3>Domination of Agricultural Land Use</h3>
+      <ul>
+        <li>The study area is heavily dominated by agricultural categories, with Crop land (<b>34.51%</b>), Fallow land (<b>23.58%</b>), and Plantation (<b>10.58%</b>) combining to cover over <b>68%</b> of the total valley.</li>
+      </ul>
+      <h3>High Overall Site Association with Agriculture</h3>
+      <ul>
+        <li>Out of all <b>338</b> recorded sites, <b>75.7% (256 sites)</b> are located on land currently classified as agricultural (Crop land, Fallow, and Plantation combined).</li>
+      </ul>
+      <h3>Strongest Agricultural Concentration in Pre-Iron Age</h3>
+      <ul>
+        <li>The Pre-Iron Age group shows the highest proportion of sites associated with agricultural land at <b>83.7% (36 out of 43 sites)</b>.</li>
+      </ul>
+      <h3>Broadening Site Distribution Over Time</h3>
+      <ul>
+        <li>The proportion of agricultural site associations gradually declines in later periods—dropping to <b>75.9%</b> in the Iron Age and <b>68.5%</b> in the Early Historic-Historical period—alongside a slight rise in sites near water bodies, built-up areas, and scrub land.</li>
+      </ul>
+      <h3>Descriptive Land Cover Baseline</h3>
+      <ul>
+        <li>While GIS analysis clearly shows that ancient sites cluster heavily in open, cultivable terrain, researchers note that present-day land cover is only a modern proxy; confirming exact ancient farming practices requires independent paleoenvironmental and artifactual evidence.</li>
+      </ul>
+    `
+  },
+  'soil-depth': {
+    html: `
+      <h3>Dominance of Deep Soils Across the Basin</h3>
+      <ul>
+        <li>Soils classified as deep, moderately deep, or slightly/moderately shallow (&gt;50 cm) cover an overwhelming <b>94.77%</b> of the entire study area in the Vaigai Valley.</li>
+      </ul>
+      <h3>High Overall Site Association with Deep Soils</h3>
+      <ul>
+        <li>Out of all <b>338</b> recorded sites, <b>94.7% (320 sites)</b> are located on deep soils, while shallow and extremely shallow soils account for less than <b>6%</b> of the total site distribution.</li>
+      </ul>
+      <h3>Exclusive Deep-Soil Use in the Pre-Iron Age</h3>
+      <ul>
+        <li>All <b>43</b> sites (<b>100%</b>) belonging to the Pre-Iron Age group are located strictly on deep soils, with none recorded on shallow or extremely shallow soils.</li>
+      </ul>
+      <h3>Iron Age Expansion into Shallower Soils</h3>
+      <ul>
+        <li>The Iron Age group shows the greatest variation in soil depth, with <b>6.6%</b> of its sites (<b>16 sites</b>) located on shallow soils (25–50 cm), making it the only period group with a meaningful presence on shallower ground.</li>
+      </ul>
+      <h3>Descriptive Soil Depth Pattern</h3>
+      <ul>
+        <li>While GIS data shows a strong, consistent association between settlement and deep soils across all periods (<b>98.1%</b> in the Early Historic-Historical phase), researchers note that this is a descriptive spatial trend; confirming exact agricultural motives or population pressures requires independent subsistence and artifactual evidence.</li>
+      </ul>
+    `
+  },
+  'soil-erosion': {
+    html: `
+      <h3>Dominance of Low-Erosion Land</h3>
+      <ul>
+        <li>The majority of the study area falls into low-to-moderate erosion risk, with the Slight erosion class covering <b>47.73%</b> and the Moderate class covering <b>31.49%</b> of the Vaigai basin.</li>
+      </ul>
+      <h3>Strong Overall Association with Stable Soils</h3>
+      <ul>
+        <li>Out of all <b>338</b> recorded sites, <b>89.4% (302 sites)</b> are located on stable terrain classified under Slight or Moderate erosion vulnerability.</li>
+      </ul>
+      <h3>Pre-Iron Age Preference for Stability</h3>
+      <ul>
+        <li>The Pre-Iron Age group shows the highest relative association with low-erosion terrain, with <b>95.3%</b> of its sites located on stable soils and a high Slight-to-Severe preference ratio of <b>14.5:1</b>.</li>
+      </ul>
+      <h3>Iron Age Expansion into Severe Terrain</h3>
+      <ul>
+        <li>The Iron Age group displays a higher share of sites in Severe erosion zones (<b>12.4%</b>) compared to the Pre-Iron Age (<b>4.7%</b>) and Early Historic-Historical (<b>3.7%</b>) groups, though present-day erosion data cannot confirm if these areas were already degraded at the time of settlement.</li>
+      </ul>
+      <h3>Descriptive Landscape Stability</h3>
+      <ul>
+        <li>While GIS analysis indicates that ancient settlements consistently favored low-erosion terrain—findings that are compatible with the valley's mature (Monadnock) landscape stage—researchers note that present-day erosion vulnerability is a modern measure; confirming exact ancient soil management or degradation histories requires independent geoarchaeological evidence.</li>
+      </ul>
+    `
+  },
+  'soil-productivity': {
+    html: `
+      <h3>Domination of Highly Productive Soils</h3>
+      <ul>
+        <li>The INDIA-WRIS dataset shows that Highly Productive soils cover the largest share of the study region, accounting for <b>53.57%</b> of the total Vaigai Valley area.</li>
+      </ul>
+      <h3>Strong Overall Association with Productive Land</h3>
+      <ul>
+        <li>Out of all <b>338</b> recorded sites, <b>63.3% (214 sites)</b> are located on Highly Productive soils, pointing to a consistent overall preference for agriculturally favorable land.</li>
+      </ul>
+      <h3>Pre-Iron Age Focus on Productive Terrain</h3>
+      <ul>
+        <li>The Pre-Iron Age group shows a high concentration of sites on Highly Productive soils (<b>69.8%</b>), with no recorded sites on non-productive or moderately low productive land.</li>
+      </ul>
+      <h3>Iron Age Expansion into Less Productive Soils</h3>
+      <ul>
+        <li>The Iron Age group displays the most even distribution across productivity classes, including the highest percentage of sites on Low Productive soils (<b>21.6%</b>) and the appearance of sites on Non-Productive soils, which GIS data indicates may reflect a more diversified pattern of landscape use.</li>
+      </ul>
+      <h3>Early Historic Re-concentration</h3>
+      <ul>
+        <li>During the Early Historic-Historical period, the proportion of sites on Highly Productive soils rises back up to <b>70.4%</b>, which is consistent with a renewed focus on agricultural surplus to support urban and trade centers.</li>
+      </ul>
+    `
+  },
+  'soil-texture': {
+    html: `
+      <h3>Domination of Fine-Textured Soils</h3>
+      <ul>
+        <li>Fine-textured soils (such as loamy clay and clay) cover an overwhelming <b>77.29%</b> of the total valley area, providing high water and nutrient retention.</li>
+      </ul>
+      <h3>Pre-Iron Age Concentration on Fine Soils</h3>
+      <ul>
+        <li>During the Pre-Iron Age, <b>95.35%</b> of sites were located strictly on fine-textured soils, showing a selection index of <b>+18.06</b> that points to a narrower range of soil textures used initially.</li>
+      </ul>
+      <h3>Iron Age Diversification into Other Textures</h3>
+      <ul>
+        <li>The Iron Age group shows a shift toward a wider range of soil types, with use of fine soils dropping to <b>75.52%</b> while medium- and coarse-textured soils rise slightly above their natural availability.</li>
+      </ul>
+      <h3>Proportional Use in Later Periods</h3>
+      <ul>
+        <li>By the Early Historic-Historical phase, site distribution closely matches the valley's natural soil availability across all texture classes, with selection index values close to zero.</li>
+      </ul>
+      <h3>Descriptive Textural Baseline</h3>
+      <ul>
+        <li>While GIS analysis indicates that soil texture likely functioned more as a general landscape constraint rather than a primary pull factor over time, researchers note that confirming exact agricultural strategies requires independent environmental and artifactual evidence.</li>
+      </ul>
+    `
+  },
+  'twi': {
+    html: `
+      <h3>Topographic Wetness Index Overview</h3>
+      <ul>
+        <li>TWI estimates landscape moisture potential using topography alone (upslope area and local slope gradient), with most archaeological sites in the Vaigai Valley falling within the Low Moisture (<b>54.4%</b>) and Very Low Moisture (<b>18.6%</b>) classes.</li>
+      </ul>
+      <h3>Core Moisture Envelope</h3>
+      <ul>
+        <li>A large majority of all sites—<b>70.4% (238 out of 338)</b>—are located within classes 2 and 3 (TWI 0.744 to 6.433), pointing to a consistently favored zone of moderate-to-low moisture across the sequence.</li>
+      </ul>
+      <h3>Pre-Iron Age Association with Wetter Positions</h3>
+      <ul>
+        <li>The Pre-Iron Age group records the highest weighted mean TWI value (<b>5.84</b>), indicating a relative preference for slightly wetter landscape positions such as lower slopes or valley margins.</li>
+      </ul>
+      <h3>Iron Age Intermediate Moisture Shift</h3>
+      <ul>
+        <li>The Iron Age group shows an intermediate weighted mean TWI of <b>5.05</b> alongside a fivefold increase in site count, which GIS interpretation suggests may reflect landscape expansion into drier zones or the early adoption of small-scale water management.</li>
+      </ul>
+      <h3>Early Historic Shift to Drier Positions</h3>
+      <ul>
+        <li>The Early Historic-Historical group records the lowest weighted mean TWI (<b>4.62</b>), suggesting a trend toward drier landscape positions over time that may be consistent with more advanced water management or irrigation capabilities, though this remains an interpretive hypothesis.</li>
+      </ul>
+    `
+  },
+  'euclidean-distance': {
+    html: `
+      <h3>Landscape Availability Baseline</h3>
+      <ul>
+        <li>Across the entire study area, <b>21.3%</b> of the land lies within 1 km of modern perennial water sources, while <b>43.5%</b> lies beyond 5 km.</li>
+      </ul>
+      <h3>Pre-Iron Age Distance from Modern Channels</h3>
+      <ul>
+        <li>A significant majority of Pre-Iron Age sites (<b>67.4%</b>) are located beyond 5 km from modern perennial rivers.</li>
+        <li>However, GIS data suggests this is likely a result of using modern hydrological data rather than water avoidance, pointing instead to possible settlement along ancient palaeochannels.</li>
+      </ul>
+      <h3>Iron Age Riverine Proximity Shift</h3>
+      <ul>
+        <li>The Iron Age group shows a strong shift toward modern river corridors, with <b>44.8%</b> of its sites located within 1 km of water sources.</li>
+        <li>This more than doubles the expected landscape baseline share (<b>21.3%</b>) and marks the highest riverine orientation in the sequence.</li>
+      </ul>
+      <h3>Early Historic Diversification and Alternatives</h3>
+      <ul>
+        <li>During the Early Historic-Historical period, site distribution moderates (<b>29.6%</b> within 1 km and <b>22.2%</b> beyond 5 km).</li>
+        <li>GIS interpretation suggests this partial move away from main river corridors may be consistent with the adoption of alternative water-management systems like tank irrigation.</li>
+      </ul>
+      <h3>Descriptive Three-Phase Model</h3>
+      <ul>
+        <li>While proximity modeling clearly reveals a structured shift from distant palaeochannel settings to modern river-proximate locations and subsequent diversified water use, researchers note that these are descriptive spatial trends; confirming exact ancient hydrological strategies requires independent paleoenvironmental evidence.</li>
+      </ul>
+    `
+  },
+  'paleochannel-morphometry': {
+    html: `
+      <h3>Candidate Palaeochannel Network</h3>
+      <ul>
+        <li>Using a flow accumulation threshold of <b>10,000</b> cells on a 30m SRTM DEM, GIS modelling extracted <b>1,200</b> candidate channel segments spanning a total length of <b>3,699.65 km</b> across the Vaigai, Pambar Kottakaraiyar, and Gundar river basins.</li>
+      </ul>
+      <h3>Channel Magnitude Breakdown</h3>
+      <ul>
+        <li>The extracted network is dominated by Narrow (minor/seasonal) segments at <b>69.2%</b>, alongside Medium (distributary) segments at <b>26.1%</b> and Wide (trunk-level) segments at <b>4.7%</b>.</li>
+      </ul>
+      <h3>Confidence Distribution</h3>
+      <ul>
+        <li>Only <b>8.8%</b> of the network falls into the High confidence category with robust flow accumulation support, while <b>58.3%</b> falls into Low confidence due to flat-terrain D8 routing noise.</li>
+      </ul>
+      <h3>Sinuosity and Flow Direction</h3>
+      <ul>
+        <li>Sinuosity values across the network range from <b>1.000 to 2.510</b> (mean <b>1.161</b>), with sinuous channels making up <b>56.2%</b> and straight channels <b>41.5%</b>.</li>
+        <li>Furthermore, <b>85.1%</b> of segments align with regional eastward and southeastward drainage orientations.</li>
+      </ul>
+      <h3>Archaeological Proximity</h3>
+      <ul>
+        <li>Out of all <b>338</b> recorded sites, <b>63.0% (213 sites)</b> fall within 1 km of the extracted candidate palaeochannel network, with the Iron Age group accounting for the largest share at <b>72.3%</b> of proximate sites.</li>
+      </ul>
+    `
+  },
+  'multi-buffer-ring': {
+    html: `
+      <h3>Near-Universal Proximity to Channels</h3>
+      <ul>
+        <li>Out of <b>338</b> total archaeological sites recorded in the Vaigai Valley, <b>337 sites (99.7%)</b> lie within 5 km of a candidate flow-accumulated segment.</li>
+        <li>Only a single site (<b>0.3%</b>), Aḻakarmalai, falls beyond this 5 km envelope.</li>
+      </ul>
+      <h3>High Concentration Within 1 Kilometer</h3>
+      <ul>
+        <li>The innermost 0–500m buffer band contains <b>122 sites (36.2%)</b>, and the 500–1000m band contains <b>91 sites (27.0%)</b>.</li>
+        <li>Cumulatively, <b>213 sites (63.2%)</b> are located within 1 km of the candidate river network.</li>
+      </ul>
+      <h3>Distance-Decay in Settlement Density</h3>
+      <ul>
+        <li>When adjusted for the varying surface areas of the buffer bands, site density peaks in the 0–500m band at <b>0.0365</b> sites per square kilometer.</li>
+        <li>Density declines progressively with distance, resulting in a <b>70.1%</b> overall reduction down to <b>0.0109</b> sites per square kilometer in the 2000–5000m band.</li>
+      </ul>
+      <h3>Strongest Proximity Affinity in the Pre-Iron Age</h3>
+      <ul>
+        <li>The Pre-Iron Age group demonstrates the highest proportion of close settlement, with <b>44.2%</b> of its sites located within 500m and <b>69.8%</b> located within 1 km of the network.</li>
+      </ul>
+      <h3>Settlement Dispersal in Later Periods</h3>
+      <ul>
+        <li>The Iron Age group shows a moderate distribution with <b>38.3%</b> of sites within 500m.</li>
+        <li>In contrast, the Early Historic-Historical group exhibits the weakest proximity affinity, with only <b>20.4%</b> of sites within 500m and <b>53.7%</b> within 1 km, pointing toward a more dispersed settlement pattern over time.</li>
+      </ul>
+    `
+  },
+  'kernel-density': {
+    html: `
+      <h3>Overall KDE Density Breakdown</h3>
+      <ul>
+        <li>Out of all <b>338</b> recorded sites, the updated KDE analysis classifies <b>40 sites (11.8%)</b> in the Low density tier (0.014–0.042), <b>107 sites (31.7%)</b> in Moderate density (0.043–0.075), <b>121 sites (35.8%)</b> in High density (0.076–0.12), and <b>70 sites (20.7%)</b> in Very High density (0.121–0.26).</li>
+      </ul>
+      <h3>Pre-Iron Age Clustering</h3>
+      <ul>
+        <li>Within the Pre-Iron Age group, settlements show a strong presence in the Moderate (<b>41.9%</b>) and High (<b>30.2%</b>) density classes, with <b>18</b> and <b>13</b> sites respectively, indicating localized clustering along preferred corridors.</li>
+      </ul>
+      <h3>Iron Age Peak Concentration</h3>
+      <ul>
+        <li>The Iron Age group demonstrates the highest overall settlement intensity, containing <b>89 sites</b> in the High density tier and <b>60 sites</b> in the Very High density tier, which together account for over <b>61%</b> of all Iron Age settlements.</li>
+      </ul>
+      <h3>Early Historic-Historical Moderate Spread</h3>
+      <ul>
+        <li>The Early Historic-Historical group exhibits an even split across the Moderate and High density tiers, with <b>19 sites (35.2%)</b> in each class, alongside <b>10 sites</b> in Low density and <b>6 sites</b> in Very High density.</li>
+      </ul>
+      <h3>Descriptive Spatial Intensity</h3>
+      <ul>
+        <li>While KDE classification highlights major settlement agglomerations near the flow accumulated network across all periods, researchers note that density values are descriptive spatial metrics; confirming exact demographic pressures or hierarchical clustering requires independent artifactual and chronological evidence.</li>
+      </ul>
+    `
+  },
+  'strahler-stream-order': {
+    html: `
+      <h3>Dominance of Low-Order Headwaters</h3>
+      <ul>
+        <li>A total of <b>199</b> archaeological sites (<b>58.9%</b>) are closest to first-order headwater streams, while second-order streams account for <b>64 sites (18.9%)</b>, meaning that orders 1 and 2 collectively encompass <b>77.8%</b> of the entire site corpus.</li>
+      </ul>
+      <h3>Secondary Peak at Major Tributaries</h3>
+      <ul>
+        <li>Fourth-order streams—representing major named tributaries like the Suruliyar, Manjalar, and Varahanadhi—exhibit a secondary concentration with <b>29 sites (8.6%)</b> and an average proximity distance of <b>192.9 meters</b>.</li>
+      </ul>
+      <h3>Avoidance of High-Order Trunk Channels</h3>
+      <ul>
+        <li>The seventh-order Vaigai main trunk river is associated with only <b>4 sites (1.2%)</b> and records the highest minimum distance to a stream (<b>121.12 meters</b>), pointing to a shared cross-cultural avoidance of high-energy, flood-prone trunk environments.</li>
+      </ul>
+      <h3>Iron Age Landscape-Wide Exploitation</h3>
+      <ul>
+        <li>The Iron Age group accounts for <b>241 sites (71.3%</b> of the total) and is represented across every single Strahler stream order from first through seventh, reflecting extensive utilization of diverse environmental niches across the basin.</li>
+      </ul>
+      <h3>Early Historic Lower-Order Concentration</h3>
+      <ul>
+        <li>The Early Historic–Historical group displays the heaviest concentration at lower-order streams, with <b>94.4%</b> of its sites (<b>51 out of 54</b>) situated along orders 1 through 3, suggesting a continued reliance on inherited headwater locations.</li>
+      </ul>
+    `
+  },
+  'lcp-isotropic': {
+    html: `
+      <h3>Tobler’s Hiking Function (Isotropic Cost)</h3>
+      <div class="findings-formula">
+        <p class="formula-main"><b>Cost = 1 / (6 × exp(−3.5 × abs(tan(Slope × 0.0174533))) + 0.05)</b></p>
+        <ul class="formula-breakdown">
+          <li><b>Cost</b> — Output friction value representing movement difficulty.</li>
+          <li><b>6</b> — Scaling coefficient adjusting baseline walking speed.</li>
+          <li><b>exp(...)</b> — Exponential function modeling speed decay over slope.</li>
+          <li><b>−3.5</b> — Steepness penalty coefficient.</li>
+          <li><b>abs(...)</b> — Absolute value ensuring directional neutrality (isotropy).</li>
+          <li><b>tan(...)</b> — Gradient calculation (rise over run).</li>
+          <li><b>Slope × 0.0174533</b> — Conversion factor from degrees to radians.</li>
+          <li><b>+0.05</b> — Constant baseline friction offset.</li>
+        </ul>
+      </div>
+      <h3>Macro-Scale Corridor Network</h3>
+      <ul>
+        <li>The isotropic analysis mapped <b>nine</b> least-cost corridors originating from major Vaigai tributary upper courses (Suruliyar, Upper Vaigai, Theniar, Varahanadhi, Manjalar, Varattar Nagalar, Sirumalaiyar, Sathaiyar, and Uppar) and converging uniformly at the early historic coastal hub of Alagankulam.</li>
+      </ul>
+      <h3>Total Corridor Extent</h3>
+      <ul>
+        <li>Across all nine isotropic corridors, the cumulative path length equals <b>1,564.47 km</b>.</li>
+        <li>Individual route lengths range from <b>106.34 km</b> (Corridor 9 from Ariṭṭāpaṭṭi) to <b>221.35 km</b> (Corridor 3 from Mutuvakkuḍi).</li>
+      </ul>
+      <h3>Site Proximity and Buffer Counts</h3>
+      <ul>
+        <li>Using a <b>2 km</b> search radius, the isotropic corridors encompass a total of <b>263</b> site occurrences across the network.</li>
+      </ul>
+      <h3>Corridor-Specific Distribution</h3>
+      <ul>
+        <li>Individual corridors capture varying settlement abundances within their buffers, led by Corridor 4 (<b>41 sites</b>), Corridor 5 (<b>40 sites</b>), and Corridor 3 (<b>39 sites</b>), whereas peripheral routes like Corridor 9 capture only <b>6 sites</b>.</li>
+      </ul>
+      <h3>Network Convergence Hubs</h3>
+      <ul>
+        <li>Within the frequency distribution, Site 5 (Alagankulam) serves as the ultimate destination node, appearing in all <b>9</b> corridors.</li>
+        <li>Furthermore, Site 103 emerges as a major secondary convergence node, appearing in <b>6</b> corridors.</li>
+      </ul>
+      <h3>Overall Unique Sites</h3>
+      <ul>
+        <li>The isotropic model identifies <b>163</b> total unique archaeological sites within its buffer zones, characterized by a dispersed connectivity pattern where <b>94</b> sites are unique to a single corridor.</li>
+      </ul>
+    `
+  },
+  'lcp-anisotropic': {
+    html: `
+      <h3>Tobler’s Hiking Function (Anisotropic / Directional)</h3>
+      <div class="findings-formula">
+        <p class="formula-main"><b>Walking_Speed = 6 × exp(−3.5 × (tan(VRMA × 0.0174533) + 0.05))</b></p>
+      </div>
+      <h3>Why Convert to a VRMA Lookup Table?</h3>
+      <ul>
+        <li><b>Software constraint:</b> ArcMap’s Path Distance tool cannot accept mathematical formulas directly for vertical factors; it only reads lookup tables that map slope angles to cost multipliers.</li>
+        <li><b>VRMA (Vertical Relative Moving Angle):</b> The signed slope angle calculated between adjacent cells during traversal (positive for ascent, negative for descent).</li>
+        <li><b>Vertical Factor calculation:</b> Flat-terrain walking speed (~5.037 km/h) is divided by the speed computed at each specific VRMA slope angle.</li>
+        <li><b>Discrete table mapping:</b> The continuous speed-decay values are structured into a 2-column tab-delimited text file mapping slope angles (from −90° to +90°) to specific cost multipliers (Vertical Factors).</li>
+      </ul>
+      <h3>VRMA Vertical Factor Table</h3>
+      <div class="findings-table-wrap">
+        <table class="findings-table">
+          <thead>
+            <tr><th>VRMA (°)</th><th>Vertical Factor</th><th>Description</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>−90</td><td>99999</td><td>Impassable</td></tr>
+            <tr><td>−80 to −35</td><td>0.1</td><td>Very steep downhill, capped</td></tr>
+            <tr><td>−30</td><td>0.1326</td><td>Very steep downhill</td></tr>
+            <tr><td>−25</td><td>0.1955</td><td>Very steep downhill</td></tr>
+            <tr><td>−20</td><td>0.2797</td><td>Steep downhill</td></tr>
+            <tr><td>−15</td><td>0.3915</td><td>Moderate downhill</td></tr>
+            <tr><td>−10</td><td>0.5395</td><td>Moderate downhill</td></tr>
+            <tr><td>−8</td><td>0.6115</td><td>Moderate downhill</td></tr>
+            <tr><td>−6</td><td>0.6922</td><td>Gentle downhill</td></tr>
+            <tr><td>−5</td><td>0.7362</td><td>Gentle downhill</td></tr>
+            <tr><td>−4</td><td>0.7829</td><td>Gentle downhill</td></tr>
+            <tr><td>−3</td><td>0.8324</td><td>Gentle downhill</td></tr>
+            <tr><td>−2</td><td>0.8850</td><td>Gentle downhill</td></tr>
+            <tr><td>−1</td><td>0.9407</td><td>Slight downhill</td></tr>
+            <tr><td>0</td><td>1.0000</td><td>Flat terrain</td></tr>
+            <tr><td>1</td><td>1.0630</td><td>Slight uphill</td></tr>
+            <tr><td>2</td><td>1.1300</td><td>Gentle uphill</td></tr>
+            <tr><td>3</td><td>1.2013</td><td>Gentle uphill</td></tr>
+            <tr><td>4</td><td>1.2773</td><td>Gentle uphill</td></tr>
+            <tr><td>5</td><td>1.3583</td><td>Gentle uphill</td></tr>
+            <tr><td>6</td><td>1.4446</td><td>Moderate uphill</td></tr>
+            <tr><td>8</td><td>1.6354</td><td>Moderate uphill</td></tr>
+            <tr><td>10</td><td>1.8536</td><td>Moderate uphill</td></tr>
+            <tr><td>15</td><td>2.5544</td><td>Steep uphill</td></tr>
+            <tr><td>20</td><td>3.5748</td><td>Steep uphill</td></tr>
+            <tr><td>25</td><td>5.1145</td><td>Steep uphill</td></tr>
+            <tr><td>30</td><td>7.5438</td><td>Very steep uphill</td></tr>
+            <tr><td>35</td><td>11.5968</td><td>Very steep uphill</td></tr>
+            <tr><td>40</td><td>18.8563</td><td>Very steep uphill</td></tr>
+            <tr><td>45</td><td>33.1155</td><td>Very steep uphill</td></tr>
+            <tr><td>50</td><td>64.7891</td><td>Very steep uphill</td></tr>
+            <tr><td>60</td><td>429.3094</td><td>Extremely steep</td></tr>
+            <tr><td>70</td><td>15005.4833</td><td>Extremely steep</td></tr>
+            <tr><td>80</td><td>99999</td><td>Impassable</td></tr>
+            <tr><td>90</td><td>99999</td><td>Impassable</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <h3>Macro-Scale Corridor Network</h3>
+      <ul>
+        <li>The anisotropic analysis mapped <b>nine</b> least-cost corridors connecting major tributary origins to the destination hub at Alagankulam while accounting for directional slope costs.</li>
+      </ul>
+      <h3>Total Corridor Extent</h3>
+      <ul>
+        <li>Cumulative anisotropic path length equals <b>1,549.59 km</b> across all nine corridors, resulting in a total reduction of <b>14.88 km (0.95% shorter)</b> compared to the isotropic network.</li>
+      </ul>
+      <h3>Site Proximity and Buffer Counts</h3>
+      <ul>
+        <li>Using a <b>2 km</b> search radius, the anisotropic corridors encompass <b>269</b> total site occurrences across <b>150</b> unique archaeological sites.</li>
+      </ul>
+      <h3>Corridor-Specific Distribution</h3>
+      <ul>
+        <li>Individual routes capture varying settlement abundances within their buffers, led by Corridor 4 (<b>46 sites</b>) and Corridor 3 (<b>42 sites</b>).</li>
+      </ul>
+      <h3>Network Convergence Hubs</h3>
+      <ul>
+        <li>Under the anisotropic model, both Site 5 (Alagankulam) and Site 103 emerge as primary convergence nodes, appearing in all <b>9</b> corridors.</li>
+      </ul>
+      <h3>Network Convergence Trend</h3>
+      <ul>
+        <li>The anisotropic model yields fewer unique sites (<b>150</b> vs. <b>163</b>) but higher total occurrences and greater corridor overlap, indicating that accounting for the higher energy cost of ascent routes movement through shared, gradient-efficient pathways and bottlenecks.</li>
+      </ul>
+    `
+  }
+};
+
+const KEY_FINDINGS_PLACEHOLDER = `
+  <div class="findings-placeholder">
+    Key findings for this plate are being prepared and will be added in a future update.
+  </div>
+`;
 
 function pad(n) { return String(n).padStart(2, '0'); }
 
@@ -444,6 +1224,13 @@ const nextBtn = document.getElementById('next-plate');
 const resultsToggle = document.getElementById('results-toggle');
 const plateBody = document.getElementById('plate-body');
 const resultsPanelInner = document.getElementById('results-panel-inner');
+const findingsView = document.getElementById('findings-view');
+const findingsGrid = document.getElementById('findings-grid');
+const findingsDetail = document.getElementById('findings-detail');
+const findingsContent = document.getElementById('findings-content');
+const findingsSheetNum = document.getElementById('findings-sheet-num');
+const findingsDetailTitle = document.getElementById('findings-detail-title');
+const findingsDetailDesc = document.getElementById('findings-detail-desc');
 let resultsOpen = false;
 
 function renderResultsForCurrentPlate() {
@@ -500,7 +1287,7 @@ const stray = PLATES.filter(p => !SECTIONS.some(sec => p.n >= sec.from && p.n <=
 if (stray.length) sectionsInUse.push({ id: 'other', title: 'Other Plates', from: stray[0].n, to: stray[stray.length - 1].n, plates: stray });
 const sectionRange = sec => sec.plates.length === 1 ? `Plate ${pad(sec.plates[0].n)}` : `Plates ${pad(sec.plates[0].n)}\u2013${pad(sec.plates[sec.plates.length - 1].n)}`;
 
-// Build sidebar (collapsible groups) and home grid (one heading + grid per section)
+// Build sidebar (collapsible groups), home grid, and Key Findings grid
 sectionsInUse.forEach(sec => {
   if (!sec.plates.length) return;
   const range = sectionRange(sec);
@@ -523,6 +1310,7 @@ sectionsInUse.forEach(sec => {
   group.appendChild(body);
   sidebarList.appendChild(group);
 
+  // Home atlas grid
   const block = document.createElement('section');
   block.className = 'section-block';
   block.dataset.section = sec.id;
@@ -532,8 +1320,19 @@ sectionsInUse.forEach(sec => {
   block.appendChild(secGrid);
   grid.appendChild(block);
 
+  // Key Findings grid (same grouping)
+  const fBlock = document.createElement('section');
+  fBlock.className = 'section-block';
+  fBlock.dataset.section = sec.id;
+  fBlock.innerHTML = `<h4 class="section-heading"><span class="sec-title">${sec.title}</span><span class="sec-range">${range}</span></h4>`;
+  const fSecGrid = document.createElement('div');
+  fSecGrid.className = 'plate-grid';
+  fBlock.appendChild(fSecGrid);
+  findingsGrid.appendChild(fBlock);
+
   sec.plates.forEach(p => {
     const searchText = (p.title + ' ' + p.desc + ' ' + sec.title).toLowerCase();
+    const hasFindings = !!KEY_FINDINGS[p.slug];
 
     const el = document.createElement('div');
     el.className = 'plate-link' + (p.ready ? '' : ' disabled');
@@ -541,10 +1340,16 @@ sectionsInUse.forEach(sec => {
     el.dataset.search = searchText;
     el.innerHTML = `<span class="plate-num">${pad(p.n)}</span><span class="plate-title">${p.title}</span>`;
     if (p.ready) {
-      el.addEventListener('click', () => { location.hash = p.slug; closeMobileSidebar(); });
+      el.addEventListener('click', () => {
+        // If currently browsing Key Findings, stay in findings; otherwise open the map plate
+        const inFindings = location.hash.startsWith('#findings');
+        location.hash = inFindings ? ('findings/' + p.slug) : p.slug;
+        closeMobileSidebar();
+      });
     }
     body.appendChild(el);
 
+    // Home card
     const card = document.createElement('div');
     card.className = 'plate-card' + (p.ready ? '' : ' disabled');
     card.dataset.search = searchText;
@@ -561,35 +1366,52 @@ sectionsInUse.forEach(sec => {
       card.addEventListener('click', () => { location.hash = p.slug; });
     }
     secGrid.appendChild(card);
+
+    // Key Findings card
+    const fCard = document.createElement('div');
+    fCard.className = 'findings-card';
+    fCard.dataset.search = searchText;
+    fCard.innerHTML = `
+      <div class="plate-card-body">
+        <div class="plate-card-num">SHEET ${pad(p.n)}/22</div>
+        <h4>${p.title}</h4>
+        <p>${p.desc}</p>
+        <span class="status-tag ${hasFindings ? 'ready' : 'pending'}">${hasFindings ? 'Findings available' : 'Coming soon'}</span>
+      </div>
+    `;
+    fCard.addEventListener('click', () => { location.hash = 'findings/' + p.slug; });
+    fSecGrid.appendChild(fCard);
   });
 });
 
-function showHome() {
-  homeView.classList.remove('hidden');
+function hideAllViews() {
+  homeView.classList.add('hidden');
   mapFrame.style.display = 'none';
-  mapFrame.src = '';
+  plateBody.style.display = 'none';
   topbar.classList.remove('show');
-  document.querySelectorAll('.plate-link').forEach(el => el.classList.remove('active'));
+  findingsView.classList.remove('show');
+  findingsDetail.classList.remove('show');
   resultsOpen = false;
   plateBody.classList.remove('results-open');
   resultsToggle.classList.remove('active');
   if (window.ResultsPanel) ResultsPanel.clear(resultsPanelInner);
 }
 
+function showHome() {
+  hideAllViews();
+  homeView.classList.remove('hidden');
+  document.querySelectorAll('.plate-link').forEach(el => el.classList.remove('active'));
+}
+
 function showPlate(plate) {
-  homeView.classList.add('hidden');
+  hideAllViews();
+  plateBody.style.display = '';
   mapFrame.style.display = 'block';
   const src = plate.file + '?v=' + (plate.v || 1);
   const isNewPlate = mapFrame.getAttribute('data-current') !== src;
   if (isNewPlate) {
     mapFrame.src = src;
     mapFrame.setAttribute('data-current', src);
-  }
-  if (isNewPlate) {
-    resultsOpen = false;
-    plateBody.classList.remove('results-open');
-    resultsToggle.classList.remove('active');
-    if (window.ResultsPanel) ResultsPanel.clear(resultsPanelInner);
   }
   topbar.classList.add('show');
   crumbCurrent.textContent = `SHEET ${pad(plate.n)}/22 — ${plate.title.toUpperCase()}`;
@@ -611,16 +1433,72 @@ function showPlate(plate) {
   nextBtn.onclick = () => { if (idx < readyPlates.length - 1) location.hash = readyPlates[idx + 1].slug; };
 }
 
+function showFindingsGrid() {
+  hideAllViews();
+  findingsView.classList.add('show');
+  document.querySelectorAll('.plate-link').forEach(el => el.classList.remove('active'));
+}
+
+function showFindingsDetail(plate) {
+  hideAllViews();
+  findingsDetail.classList.add('show');
+  findingsSheetNum.textContent = `SHEET ${pad(plate.n)}/22`;
+  findingsDetailTitle.textContent = plate.title;
+  findingsDetailDesc.textContent = plate.desc;
+  const data = KEY_FINDINGS[plate.slug];
+  findingsContent.innerHTML = data ? data.html : KEY_FINDINGS_PLACEHOLDER;
+  document.querySelectorAll('.plate-link').forEach(el => {
+    el.classList.toggle('active', el.dataset.slug === plate.slug);
+  });
+  const activeLink = document.querySelector('.plate-link.active');
+  const activeGroup = activeLink && activeLink.closest('.plate-group');
+  if (activeGroup) {
+    activeGroup.classList.remove('collapsed');
+    const gh = activeGroup.querySelector('.group-head');
+    if (gh) gh.setAttribute('aria-expanded', 'true');
+  }
+}
+
 function route() {
-  const slug = location.hash.replace('#', '');
-  const plate = PLATES.find(p => p.slug === slug && p.ready);
-  if (plate) showPlate(plate); else { if (slug) location.hash = ''; showHome(); }
+  const hash = location.hash.replace('#', '');
+  if (!hash) {
+    showHome();
+    return;
+  }
+  if (hash === 'findings') {
+    showFindingsGrid();
+    return;
+  }
+  if (hash.startsWith('findings/')) {
+    const slug = hash.slice('findings/'.length);
+    const plate = PLATES.find(p => p.slug === slug);
+    if (plate) {
+      showFindingsDetail(plate);
+      return;
+    }
+  }
+  const plate = PLATES.find(p => p.slug === hash && p.ready);
+  if (plate) {
+    showPlate(plate);
+    return;
+  }
+  // fallback
+  location.hash = '';
+  showHome();
 }
 window.addEventListener('hashchange', route);
 route();
 
 document.getElementById('home-link').addEventListener('click', () => { location.hash = ''; });
 document.getElementById('crumb-home').addEventListener('click', () => { location.hash = ''; });
+document.getElementById('key-findings-header').addEventListener('click', () => { location.hash = 'findings'; });
+document.getElementById('key-findings-plate').addEventListener('click', () => {
+  const current = location.hash.replace('#', '');
+  const plate = PLATES.find(p => p.slug === current);
+  if (plate) location.hash = 'findings/' + plate.slug;
+  else location.hash = 'findings';
+});
+document.getElementById('findings-back').addEventListener('click', () => { location.hash = 'findings'; });
 
 // Keyboard paging between plates (ignored while typing in a filter box)
 document.addEventListener('keydown', (e) => {
@@ -630,7 +1508,7 @@ document.addEventListener('keydown', (e) => {
   if (e.key === 'ArrowLeft' && !prevBtn.disabled && topbar.classList.contains('show')) prevBtn.click();
 });
 
-// Live filter (sidebar + home grid stay in sync)
+// Live filter (sidebar + home grid + findings grid stay in sync)
 function applyFilter(term) {
   term = term.trim().toLowerCase();
   document.querySelectorAll('.plate-link').forEach(el => {
@@ -639,11 +1517,17 @@ function applyFilter(term) {
   document.querySelectorAll('.plate-card').forEach(el => {
     el.classList.toggle('hide', term && !el.dataset.search.includes(term));
   });
+  document.querySelectorAll('.findings-card').forEach(el => {
+    el.classList.toggle('hide', term && !el.dataset.search.includes(term));
+  });
   document.querySelectorAll('.plate-group').forEach(g => {
     g.classList.toggle('hide', !g.querySelector('.plate-link:not(.hide)'));
   });
-  document.querySelectorAll('.section-block').forEach(b => {
+  document.querySelectorAll('#plate-grid .section-block').forEach(b => {
     b.classList.toggle('hide', !b.querySelector('.plate-card:not(.hide)'));
+  });
+  document.querySelectorAll('#findings-grid .section-block').forEach(b => {
+    b.classList.toggle('hide', !b.querySelector('.findings-card:not(.hide)'));
   });
   sidebarList.classList.toggle('filtering', !!term);
 }
