@@ -4574,11 +4574,13 @@ document.getElementById('toggle-district').addEventListener('change', (e) => {
 
 window.RESULTS_DATA = [
   {
-    "title": "Corridor Path Length \u2014 Isotropic vs Anisotropic (km)",
+    "title": "Isotropic vs Anisotropic Corridor Length and Percentage Change",
     "titleSize": 14,
     "xAxisLabel": "Corridor",
-    "yAxisLabel": "Length (km)",
+    "yAxisLabel": "Path Length (km)",
     "unit": "km",
+    "secondaryYAxisLabel": "Percentage Change (%)",
+    "secondaryUnit": "%",
     "categories": [
       "Corridor 1",
       "Corridor 2",
@@ -4588,7 +4590,8 @@ window.RESULTS_DATA = [
       "Corridor 6",
       "Corridor 7",
       "Corridor 8",
-      "Corridor 9"
+      "Corridor 9",
+      "TOTAL"
     ],
     "series": [
       {
@@ -4602,7 +4605,8 @@ window.RESULTS_DATA = [
           175.23,
           144.09,
           133.88,
-          106.34
+          106.34,
+          1564.47
         ]
       },
       {
@@ -4616,31 +4620,14 @@ window.RESULTS_DATA = [
           174.45,
           143.57,
           132.38,
-          105.83
+          105.83,
+          1549.59
         ]
-      }
-    ]
-  },
-  {
-    "title": "Path Length % Change (Isotropic \u2192 Anisotropic)",
-    "titleSize": 14,
-    "xAxisLabel": "Corridor",
-    "yAxisLabel": "% Change",
-    "unit": "%",
-    "categories": [
-      "Corridor 1",
-      "Corridor 2",
-      "Corridor 3",
-      "Corridor 4",
-      "Corridor 5",
-      "Corridor 6",
-      "Corridor 7",
-      "Corridor 8",
-      "Corridor 9"
-    ],
-    "series": [
+      },
       {
         "name": "% Change",
+        "type": "line",
+        "axis": "secondary",
         "data": [
           -1.39,
           -2.62,
@@ -4650,50 +4637,17 @@ window.RESULTS_DATA = [
           -0.45,
           -0.36,
           -1.12,
-          -0.48
+          -0.48,
+          -0.95
         ]
       }
     ]
   },
   {
-    "title": "Path Length Difference (Anisotropic \u2212 Isotropic, km)",
+    "title": "Sites in 2km Buffer by Corridor: Isotropic vs Anisotropic",
     "titleSize": 14,
-    "xAxisLabel": "Corridor",
-    "yAxisLabel": "Difference (km)",
-    "unit": "km",
-    "categories": [
-      "Corridor 1",
-      "Corridor 2",
-      "Corridor 3",
-      "Corridor 4",
-      "Corridor 5",
-      "Corridor 6",
-      "Corridor 7",
-      "Corridor 8",
-      "Corridor 9"
-    ],
-    "series": [
-      {
-        "name": "Difference (km)",
-        "data": [
-          -3.06,
-          -5.19,
-          -1.18,
-          -1.46,
-          -0.68,
-          -0.78,
-          -0.52,
-          -1.5,
-          -0.51
-        ]
-      }
-    ]
-  },
-  {
-    "title": "Sites in 2 km Buffer \u2014 Isotropic vs Anisotropic",
-    "titleSize": 14,
-    "xAxisLabel": "Corridor",
-    "yAxisLabel": "Sites",
+    "xAxisLabel": "Corridors",
+    "yAxisLabel": "Number of sites",
     "unit": "sites",
     "categories": [
       "Corridor 1",
@@ -4704,11 +4658,12 @@ window.RESULTS_DATA = [
       "Corridor 6",
       "Corridor 7",
       "Corridor 8",
-      "Corridor 9"
+      "Corridor 9",
+      "TOTAL"
     ],
     "series": [
       {
-        "name": "Isotropic (total 263)",
+        "name": "Total Sites in 2km Buffer (Isotropic)",
         "data": [
           36,
           33,
@@ -4718,11 +4673,12 @@ window.RESULTS_DATA = [
           25,
           31,
           12,
-          6
+          6,
+          263
         ]
       },
       {
-        "name": "Anisotropic (total 269)",
+        "name": "Total Sites in 2km Buffer (Anisotropic)",
         "data": [
           36,
           28,
@@ -4732,17 +4688,72 @@ window.RESULTS_DATA = [
           26,
           33,
           14,
-          7
+          7,
+          269
         ]
       }
     ]
   },
   {
-    "title": "Site Frequency across Corridors \u2014 Unique Site Counts",
+    "title": "Site Count by Frequency of Occurrence: Isotropic vs Anisotropic",
     "titleSize": 14,
-    "xAxisLabel": "Frequency",
-    "yAxisLabel": "Unique sites",
+    "xAxisLabel": "Frequency of Appearance across Corridors",
+    "yAxisLabel": "Number of sites",
     "unit": "sites",
+    "categories": [
+      "9 times",
+      "8 times",
+      "7 times",
+      "6 times",
+      "5 times",
+      "4 times",
+      "3 times",
+      "2 times",
+      "1 time",
+      "TOTAL UNIQUE SITES",
+      "TOTAL OCCURRENCES"
+    ],
+    "series": [
+      {
+        "name": "Site Count (isotropic)",
+        "data": [
+          1,
+          0,
+          0,
+          1,
+          1,
+          0,
+          17,
+          49,
+          94,
+          163,
+          263
+        ]
+      },
+      {
+        "name": "Site Count (Anisotropic)",
+        "data": [
+          2,
+          0,
+          0,
+          0,
+          14,
+          0,
+          4,
+          39,
+          91,
+          150,
+          269
+        ]
+      }
+    ]
+  },
+  {
+    "title": "Traversal Frequency Distribution \u2014 Isotropic vs. Anisotropic LCP Networks",
+    "titleSize": 14,
+    "xAxisLabel": "Traversal Frequency",
+    "yAxisLabel": "Number of Sites / Occurrences",
+    "unit": "sites / occurrences",
     "categories": [
       "9 times",
       "8 times",
@@ -4756,7 +4767,7 @@ window.RESULTS_DATA = [
     ],
     "series": [
       {
-        "name": "Isotropic (163 unique)",
+        "name": "Site Count (Isotropic)",
         "data": [
           1,
           0,
@@ -4770,41 +4781,7 @@ window.RESULTS_DATA = [
         ]
       },
       {
-        "name": "Anisotropic (150 unique)",
-        "data": [
-          2,
-          0,
-          0,
-          0,
-          14,
-          0,
-          4,
-          39,
-          91
-        ]
-      }
-    ]
-  },
-  {
-    "title": "Site Frequency across Corridors \u2014 Occurrences",
-    "titleSize": 14,
-    "xAxisLabel": "Frequency",
-    "yAxisLabel": "Occurrences",
-    "unit": "occurrences",
-    "categories": [
-      "9 times",
-      "8 times",
-      "7 times",
-      "6 times",
-      "5 times",
-      "4 times",
-      "3 times",
-      "2 times",
-      "1 time"
-    ],
-    "series": [
-      {
-        "name": "Isotropic (263 occurrences)",
+        "name": "Occurrences (Isotropic)",
         "data": [
           9,
           0,
@@ -4818,7 +4795,21 @@ window.RESULTS_DATA = [
         ]
       },
       {
-        "name": "Anisotropic (269 occurrences)",
+        "name": "Site Count (Anisotropic)",
+        "data": [
+          2,
+          0,
+          0,
+          0,
+          14,
+          0,
+          4,
+          39,
+          91
+        ]
+      },
+      {
+        "name": "Occurrences (Anisotropic)",
         "data": [
           18,
           0,
