@@ -246,8 +246,8 @@ const SITE_DATA = [
     "period_group": "Iron Age",
     "district": "Dindigul",
     "buffer_code": 0,
-    "mbuffer_m": 5000,
-    "mbuffer": "2000–5000 m"
+    "mbuffer_m": null,
+    "mbuffer": "Outside Buffer (>5000 m)"
   },
   {
     "id": 8,
@@ -4234,6 +4234,7 @@ const BUFFER_INFO = {
   "500\u20131000 m": { color: "#87CEEB" },
   "1000\u20132000 m": { color: "#9B59D6" },
   "2000\u20135000 m": { color: "#98FB98" },
+  "Outside Buffer (>5000 m)": { color: "#9E9E9E" },
 };
 
 const PERIOD_COLORS = {
@@ -4407,7 +4408,7 @@ if (bufFilterDiv) {
 (function buildBufChart() {
   const counts = {};
   SITE_DATA.forEach(s => { if (s.mbuffer) counts[s.mbuffer] = (counts[s.mbuffer] || 0) + 1; });
-  const order = ["0–500 m","500–1000 m","1000–2000 m","2000–5000 m"];
+  const order = ["0–500 m","500–1000 m","1000–2000 m","2000–5000 m","Outside Buffer (>5000 m)"];
   const types = order.filter(t => counts[t]);
   const maxC = Math.max(...Object.values(counts), 1);
   const div = document.getElementById('buf-threshold-chart');
