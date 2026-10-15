@@ -3941,30 +3941,108 @@ const LULC_GRID_W = 9000, LULC_GRID_H = 5184;
 map.createPane('lulcPane');
 (function () { const p = map.getPane('lulcPane'); p.style.zIndex = 399; p.style.opacity = 0.88; p.style.pointerEvents = 'none'; })();
 const lulcLayer = (function () {
-  // Land-cover classes drawn as smooth vector polygons (crisp at every zoom level)
-  const rad = Math.PI / 180;
+  // Land-cover classes drawn as crisp vector polygons on ONE custom canvas.
+  // Same polygons, colours, 0.7px outline and 88% opacity as before, but the coordinates are
+  // projected once at load. Each pan/zoom redraw only culls off-screen rings and scales the
+  // rest, instead of Leaflet re-projecting, clipping and simplifying ~1.1 million vertices.
+  const rad = Math.PI / 180, TWO_PI = 2 * Math.PI;
   const my = (lat) => Math.log(Math.tan(Math.PI / 4 + lat * rad / 2));
   const S = LULC_BOUNDS[0][0], W = LULC_BOUNDS[0][1], N = LULC_BOUNDS[1][0], E = LULC_BOUNDS[1][1];
   const yTop = my(N), yBot = my(S);
-  const renderer = L.canvas({ pane: 'lulcPane', padding: 0.3 });
   const colors = Object.values(LULC_INFO).map(v => v.color);
-  const paths = LULC_VEC_DATA.map(([code, str]) => {
-    const color = colors[code - 1] || '#999';
-    const multi = str.split('|').map(poly => poly.split(';').map(ringStr => {
-      const d = ringStr.split(',').map(Number), ring = [];
-      let x = 0, y = 0;
-      for (let i = 0; i < d.length; i += 2) {
-        x += d[i]; y += d[i + 1];
-        const yy = yTop - y / LULC_GRID_H * (yTop - yBot);
-        ring.push([(2 * Math.atan(Math.exp(yy)) - Math.PI / 2) / rad, W + x / LULC_GRID_W * (E - W)]);
+  const PAD = 0.3, SQ_TOL = 0.4 * 0.4, STROKE_W = 0.7;
+
+  // Decode once into Web-Mercator unit-square coordinates (x, y in 0..1) with a bbox per ring.
+  const classes = LULC_VEC_DATA.map(([code, str]) => {
+    const rings = [];
+    str.split('|').forEach(poly => poly.split(';').forEach(ringStr => {
+      const d = ringStr.split(',').map(Number), n = d.length >> 1, pts = new Float64Array(n * 2);
+      let x = 0, y = 0, minx = Infinity, miny = Infinity, maxx = -Infinity, maxy = -Infinity;
+      for (let i = 0; i < n; i++) {
+        x += d[2 * i]; y += d[2 * i + 1];
+        const wx = (W + x / LULC_GRID_W * (E - W) + 180) / 360;
+        const wy = 0.5 - (yTop - y / LULC_GRID_H * (yTop - yBot)) / TWO_PI;
+        pts[2 * i] = wx; pts[2 * i + 1] = wy;
+        if (wx < minx) minx = wx; if (wx > maxx) maxx = wx;
+        if (wy < miny) miny = wy; if (wy > maxy) maxy = wy;
       }
-      return ring;
+      if (n) rings.push({ pts: pts, minx: minx, maxx: maxx, miny: miny, maxy: maxy });
     }));
-    return L.polygon(multi, { pane: 'lulcPane', renderer: renderer, interactive: false, smoothFactor: 0.4,
-      stroke: true, color: color, weight: 0.7, opacity: 1, lineJoin: 'round',
-      fill: true, fillColor: color, fillOpacity: 1, fillRule: 'evenodd' });
+    return { color: colors[code - 1] || '#999', rings: rings };
   });
-  const group = L.featureGroup(paths);
+
+  const LulcCanvas = L.Layer.extend({
+    options: { pane: 'lulcPane' },
+    onAdd: function () {
+      if (!this._canvas) {
+        this._canvas = L.DomUtil.create('canvas', 'leaflet-zoom-animated');
+        this._canvas.style.pointerEvents = 'none';
+        this._ctx = this._canvas.getContext('2d');
+      }
+      this.getPane().appendChild(this._canvas);
+      this._update();
+    },
+    onRemove: function () { L.DomUtil.remove(this._canvas); },
+    getEvents: function () {
+      return { viewreset: this._update, moveend: this._update, zoom: this._onZoom, zoomanim: this._animateZoom };
+    },
+    getBounds: function () { return L.latLngBounds(LULC_BOUNDS); },
+    _onZoom: function () { this._updateTransform(this._map.getCenter(), this._map.getZoom()); },
+    _animateZoom: function (e) { this._updateTransform(e.center, e.zoom); },
+    _updateTransform: function (center, zoom) {
+      const m = this._map;
+      const scale = m.getZoomScale(zoom, this._zoom),
+        viewHalf = m.getSize().multiplyBy(0.5 + PAD),
+        centerPt = m.project(this._center, zoom),
+        offset = viewHalf.multiplyBy(-scale).add(centerPt).subtract(m._getNewPixelOrigin(center, zoom));
+      L.DomUtil.setTransform(this._canvas, offset, scale);
+    },
+    _update: function () {
+      const m = this._map, c = this._canvas;
+      const size = m.getSize();
+      const min = m.containerPointToLayerPoint(size.multiplyBy(-PAD)).round();
+      const bsize = size.multiplyBy(1 + PAD * 2).round();
+      const k = L.Browser.retina ? 2 : 1;
+      this._min = min; this._size = bsize; this._center = m.getCenter(); this._zoom = m.getZoom();
+      L.DomUtil.setPosition(c, min);
+      c.width = k * bsize.x; c.height = k * bsize.y;
+      c.style.width = bsize.x + 'px'; c.style.height = bsize.y + 'px';
+      if (k === 2) this._ctx.scale(2, 2);
+      this._draw();
+    },
+    _draw: function () {
+      const m = this._map, ctx = this._ctx, bs = this._size;
+      const sc = m.options.crs.scale(m.getZoom()), po = m.getPixelOrigin();
+      const ox = po.x + this._min.x, oy = po.y + this._min.y, mg = 2 / sc;
+      const x0 = ox / sc - mg, x1 = (ox + bs.x) / sc + mg, y0 = oy / sc - mg, y1 = (oy + bs.y) / sc + mg;
+      ctx.clearRect(0, 0, bs.x, bs.y);
+      ctx.lineJoin = 'round'; ctx.lineWidth = STROKE_W;
+      for (let c = 0; c < classes.length; c++) {
+        const cls = classes[c], rings = cls.rings;
+        let any = false;
+        ctx.beginPath();
+        for (let r = 0; r < rings.length; r++) {
+          const ring = rings[r];
+          if (ring.maxx < x0 || ring.minx > x1 || ring.maxy < y0 || ring.miny > y1) continue;
+          const p = ring.pts, n = p.length;
+          let lx = p[0] * sc - ox, ly = p[1] * sc - oy;
+          ctx.moveTo(lx, ly);
+          for (let i = 2; i < n; i += 2) {
+            const x = p[i] * sc - ox, y = p[i + 1] * sc - oy, dx = x - lx, dy = y - ly;
+            if (dx * dx + dy * dy < SQ_TOL && i < n - 2) continue;   // sub-pixel vertex: skip
+            ctx.lineTo(x, y); lx = x; ly = y;
+          }
+          ctx.closePath();
+          any = true;
+        }
+        if (!any) continue;
+        ctx.fillStyle = cls.color; ctx.fill('evenodd');
+        ctx.strokeStyle = cls.color; ctx.stroke();
+      }
+    }
+  });
+
+  const group = new LulcCanvas();
   group.setOpacity = function (o) { map.getPane('lulcPane').style.opacity = o; return this; };
   return group;
 })().addTo(map);
