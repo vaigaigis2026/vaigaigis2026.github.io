@@ -3953,7 +3953,8 @@ const lulcLayer = (function () {
   const PAD = 0.3, SQ_TOL = 0.4 * 0.4, STROKE_W = 0.7;
 
   // Decode once into Web-Mercator unit-square coordinates (x, y in 0..1) with a bbox per ring.
-  const classes = LULC_VEC_DATA.map(([code, str]) => {
+  let RING_ID = 0, MAX_N = 0;
+  const classes = LULC_VEC_DATA.map(([code, str], ci) => {
     const rings = [];
     str.split('|').forEach(poly => poly.split(';').forEach(ringStr => {
       const d = ringStr.split(',').map(Number), n = d.length >> 1, pts = new Float64Array(n * 2);
@@ -3966,83 +3967,121 @@ const lulcLayer = (function () {
         if (wx < minx) minx = wx; if (wx > maxx) maxx = wx;
         if (wy < miny) miny = wy; if (wy > maxy) maxy = wy;
       }
-      if (n) rings.push({ pts: pts, minx: minx, maxx: maxx, miny: miny, maxy: maxy });
+      if (n) { if (n > MAX_N) MAX_N = n; rings.push({ id: RING_ID++, ci: ci, stamp: 0, pts: pts, minx: minx, maxx: maxx, miny: miny, maxy: maxy }); }
     }));
     return { color: colors[code - 1] || '#999', rings: rings };
   });
 
-  const LulcCanvas = L.Layer.extend({
-    options: { pane: 'lulcPane' },
-    onAdd: function () {
-      if (!this._canvas) {
-        this._canvas = L.DomUtil.create('canvas', 'leaflet-zoom-animated');
-        this._canvas.style.pointerEvents = 'none';
-        this._ctx = this._canvas.getContext('2d');
-      }
-      this.getPane().appendChild(this._canvas);
-      this._update();
-    },
-    onRemove: function () { L.DomUtil.remove(this._canvas); },
-    getEvents: function () {
-      return { viewreset: this._update, moveend: this._update, zoom: this._onZoom, zoomanim: this._animateZoom };
-    },
-    getBounds: function () { return L.latLngBounds(LULC_BOUNDS); },
-    _onZoom: function () { this._updateTransform(this._map.getCenter(), this._map.getZoom()); },
-    _animateZoom: function (e) { this._updateTransform(e.center, e.zoom); },
-    _updateTransform: function (center, zoom) {
-      const m = this._map;
-      const scale = m.getZoomScale(zoom, this._zoom),
-        viewHalf = m.getSize().multiplyBy(0.5 + PAD),
-        centerPt = m.project(this._center, zoom),
-        offset = viewHalf.multiplyBy(-scale).add(centerPt).subtract(m._getNewPixelOrigin(center, zoom));
-      L.DomUtil.setTransform(this._canvas, offset, scale);
-    },
-    _update: function () {
-      const m = this._map, c = this._canvas;
-      const size = m.getSize();
-      const min = m.containerPointToLayerPoint(size.multiplyBy(-PAD)).round();
-      const bsize = size.multiplyBy(1 + PAD * 2).round();
-      const k = L.Browser.retina ? 2 : 1;
-      this._min = min; this._size = bsize; this._center = m.getCenter(); this._zoom = m.getZoom();
-      L.DomUtil.setPosition(c, min);
-      c.width = k * bsize.x; c.height = k * bsize.y;
-      c.style.width = bsize.x + 'px'; c.style.height = bsize.y + 'px';
-      if (k === 2) this._ctx.scale(2, 2);
-      this._draw();
-    },
-    _draw: function () {
-      const m = this._map, ctx = this._ctx, bs = this._size;
-      const sc = m.options.crs.scale(m.getZoom()), po = m.getPixelOrigin();
-      const ox = po.x + this._min.x, oy = po.y + this._min.y, mg = 2 / sc;
-      const x0 = ox / sc - mg, x1 = (ox + bs.x) / sc + mg, y0 = oy / sc - mg, y1 = (oy + bs.y) / sc + mg;
-      ctx.clearRect(0, 0, bs.x, bs.y);
-      ctx.lineJoin = 'round'; ctx.lineWidth = STROKE_W;
-      for (let c = 0; c < classes.length; c++) {
-        const cls = classes[c], rings = cls.rings;
-        let any = false;
-        ctx.beginPath();
-        for (let r = 0; r < rings.length; r++) {
-          const ring = rings[r];
-          if (ring.maxx < x0 || ring.minx > x1 || ring.maxy < y0 || ring.miny > y1) continue;
-          const p = ring.pts, n = p.length;
-          let lx = p[0] * sc - ox, ly = p[1] * sc - oy;
-          ctx.moveTo(lx, ly);
-          for (let i = 2; i < n; i += 2) {
-            const x = p[i] * sc - ox, y = p[i + 1] * sc - oy, dx = x - lx, dy = y - ly;
-            if (dx * dx + dy * dy < SQ_TOL && i < n - 2) continue;   // sub-pixel vertex: skip
-            ctx.lineTo(x, y); lx = x; ly = y;
-          }
-          ctx.closePath();
-          any = true;
-        }
-        if (!any) continue;
-        ctx.fillStyle = cls.color; ctx.fill('evenodd');
-        ctx.strokeStyle = cls.color; ctx.stroke();
+  // ---- spatial grid index so each tile only touches the rings that fall inside it ----
+  let gx0 = Infinity, gy0 = Infinity, gx1 = -Infinity, gy1 = -Infinity;
+  classes.forEach(c => c.rings.forEach(r => {
+    if (r.minx < gx0) gx0 = r.minx; if (r.maxx > gx1) gx1 = r.maxx;
+    if (r.miny < gy0) gy0 = r.miny; if (r.maxy > gy1) gy1 = r.maxy;
+  }));
+  const GN = 48, gw = (gx1 - gx0) / GN || 1, gh = (gy1 - gy0) / GN || 1;
+  const cells = []; for (let i = 0; i < GN * GN; i++) cells.push([]);
+  const cl = (v) => Math.max(0, Math.min(GN - 1, v));
+  classes.forEach(c => c.rings.forEach(r => {
+    const i0 = cl(Math.floor((r.minx - gx0) / gw)), i1 = cl(Math.floor((r.maxx - gx0) / gw));
+    const j0 = cl(Math.floor((r.miny - gy0) / gh)), j1 = cl(Math.floor((r.maxy - gy0) / gh));
+    for (let j = j0; j <= j1; j++) for (let i = i0; i <= i1; i++) cells[j * GN + i].push(r);
+  }));
+
+  // ---- tiled vector renderer: every 256px tile is drawn from the full-resolution vector data
+  //      (nothing is resampled or discarded), then browser-cached like a normal tile layer, so
+  //      pan/zoom are as smooth as the basemap. Tiles are drawn a few ms per frame, newest first.
+  const TS = 256, K = L.Browser.retina ? 2 : 1;
+  const lod = {};                                  // per-zoom cache of simplified rings (shared by tiles)
+  const buf = new Float64Array(MAX_N * 2);
+  let stampCtr = 0;
+  const queue = []; let pumping = false;
+
+  function drawTile(job) {
+    const tile = job.tile, z = job.coords.z, sc = 256 * Math.pow(2, z);
+    const ox = job.coords.x * TS, oy = job.coords.y * TS, mg = 2 / sc;
+    const x0 = ox / sc - mg, x1 = (ox + TS) / sc + mg, y0 = oy / sc - mg, y1 = (oy + TS) / sc + mg;
+    if (x1 < gx0 || x0 > gx1 || y1 < gy0 || y0 > gy1) return;
+    const i0 = cl(Math.floor((x0 - gx0) / gw)), i1 = cl(Math.floor((x1 - gx0) / gw));
+    const j0 = cl(Math.floor((y0 - gy0) / gh)), j1 = cl(Math.floor((y1 - gy0) / gh));
+    const stamp = ++stampCtr, buckets = new Array(classes.length);
+    for (let j = j0; j <= j1; j++) for (let i = i0; i <= i1; i++) {
+      const cell = cells[j * GN + i];
+      for (let q = 0; q < cell.length; q++) {
+        const r = cell[q];
+        if (r.stamp === stamp) continue;
+        r.stamp = stamp;
+        if (r.maxx < x0 || r.minx > x1 || r.maxy < y0 || r.miny > y1) continue;
+        (buckets[r.ci] || (buckets[r.ci] = [])).push(r);
       }
     }
+    const ctx = tile.getContext('2d');
+    if (K === 2) ctx.scale(2, 2);
+    ctx.lineJoin = 'round'; ctx.lineWidth = STROKE_W;
+    const tol = 0.4 / sc, sqTol = tol * tol, tiny = 0.8 / sc;
+    const cache = z <= 14 ? (lod[z] || (lod[z] = [])) : null;
+    for (let c = 0; c < classes.length; c++) {
+      const list = buckets[c]; if (!list) continue;
+      ctx.beginPath();
+      for (let r = 0; r < list.length; r++) {
+        const ring = list[r];
+        if (ring.maxx - ring.minx < tiny && ring.maxy - ring.miny < tiny) {      // sub-pixel ring
+          ctx.moveTo(ring.minx * sc - ox, ring.miny * sc - oy);
+          ctx.lineTo(ring.maxx * sc - ox, ring.maxy * sc - oy);
+          continue;
+        }
+        let sp = cache ? cache[ring.id] : null;
+        if (!sp) {                                    // drop sub-pixel vertices once per zoom level
+          const p = ring.pts, n = p.length;
+          let lx = p[0], ly = p[1], k = 0;
+          buf[k++] = lx; buf[k++] = ly;
+          for (let i = 2; i < n; i += 2) {
+            const dx = p[i] - lx, dy = p[i + 1] - ly;
+            if (dx * dx + dy * dy < sqTol && i < n - 2) continue;
+            buf[k++] = lx = p[i]; buf[k++] = ly = p[i + 1];
+          }
+          sp = buf.slice(0, k);
+          if (cache) cache[ring.id] = sp;
+        }
+        ctx.moveTo(sp[0] * sc - ox, sp[1] * sc - oy);
+        for (let i = 2; i < sp.length; i += 2) ctx.lineTo(sp[i] * sc - ox, sp[i + 1] * sc - oy);
+        ctx.closePath();
+      }
+      ctx.fillStyle = classes[c].color; ctx.fill('evenodd');
+      ctx.strokeStyle = classes[c].color; ctx.stroke();
+    }
+  }
+
+  function pump() {
+    if (pumping) return;
+    pumping = true;
+    requestAnimationFrame(function run() {
+      const t0 = performance.now();
+      while (queue.length && performance.now() - t0 < 8) {
+        const job = queue.pop();                      // newest request = what is on screen now
+        if (!job.tile._dead) drawTile(job);
+        job.done(null, job.tile);
+      }
+      pumping = false;
+      if (queue.length) pump();
+    });
+  }
+
+  const LulcTiles = L.GridLayer.extend({
+    options: { pane: 'lulcPane', tileSize: TS, keepBuffer: 4, updateWhenZooming: false,
+               bounds: L.latLngBounds(LULC_BOUNDS) },
+    createTile: function (coords, done) {
+      const tile = L.DomUtil.create('canvas', 'leaflet-tile');
+      tile.width = TS * K; tile.height = TS * K;
+      tile.style.pointerEvents = 'none';
+      queue.push({ tile: tile, coords: coords, done: done });
+      pump();
+      return tile;
+    },
+    getBounds: function () { return L.latLngBounds(LULC_BOUNDS); }
   });
 
-  const group = new LulcCanvas();
+  const group = new LulcTiles();
+  group.on('tileunload', function (e) { e.tile._dead = true; });
   group.setOpacity = function (o) { map.getPane('lulcPane').style.opacity = o; return this; };
   return group;
 })().addTo(map);
