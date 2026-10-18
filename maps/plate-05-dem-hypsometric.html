@@ -77,6 +77,25 @@
   }
   .river-label.main-stem { font-size: 13.5px; color: #0f3d75; }
   .river-label::before { display: none; }
+  .stage-callout { margin:10px 0 4px; padding:8px 10px 9px; background:#fbf3ea; border:1px solid #e6cfb4; border-left:5px solid #b5651d; border-radius:2px; }
+  .stage-kicker { font-variant:small-caps; letter-spacing:0.9px; font-size:10.5px; font-weight:700; color:var(--muted); }
+  .stage-name { margin-top:2px; font-family:Georgia, 'Times New Roman', serif; font-size:16px; font-weight:700; color:#8a4b12; letter-spacing:0.2px; }
+  .stage-scale { position:relative; display:flex; height:4px; margin:13px 0 4px; }
+  .stage-scale .seg { height:100%; }
+  .stage-scale .old { width:35%; background:#b5651d; }
+  .stage-scale .mature { width:25%; background:#e3c98f; opacity:0.75; }
+  .stage-scale .young { width:40%; background:#a9c98a; opacity:0.75; }
+  .stage-marker { position:absolute; top:-7px; width:0; height:0; border-left:4px solid transparent; border-right:4px solid transparent; border-top:6px solid #1c1c1c; transform:translateX(-50%); }
+  .stage-labels { display:flex; font-size:9.5px; color:var(--muted); text-align:center; }
+  .stage-labels span:nth-child(1) { width:35%; color:#8a4b12; font-weight:700; }
+  .stage-labels span:nth-child(2) { width:25%; }
+  .stage-labels span:nth-child(3) { width:40%; }
+  .stage-desc { font-size:11.5px; line-height:1.45; margin-top:8px; color:#222; }
+  .stage-plain { font-size:11.5px; line-height:1.45; margin-top:6px; padding-top:6px; border-top:1px solid #e6cfb4; color:#555; }
+  .case-card { background:#fbfaf7; border:1px solid #cfcabd; }
+  .case-label { font-variant:small-caps; letter-spacing:0.9px; font-size:10.5px; font-weight:700; color:var(--muted); }
+  .case-title { font-size:12.5px; font-weight:700; color:var(--ink); margin:3px 0 3px; line-height:1.35; }
+  .case-why { font-size:11px; font-style:italic; color:var(--muted); line-height:1.4; margin-bottom:6px; }
 </style>
 </head>
 <body>
@@ -126,13 +145,30 @@
     <div class="stat-box" style="margin-top:12px;">
       <div style="font-size:11px; text-transform:uppercase; letter-spacing:0.5px; color:var(--muted); margin-bottom:4px;">Hypsometric Integral (HI)</div>
       <b style="font-size:17px;">HI = 0.1146</b>
-      <div style="font-size:11.5px; margin-top:2px;">Geomorphic Stage: Old (Monadnock) — advanced erosion, stable low-relief alluvial landscape. Statistical method (Pike &amp; Wilson, 1971).</div>
+      <div class="stage-callout">
+        <div class="stage-kicker">Geomorphic Stage</div>
+        <div class="stage-name">Old (Monadnock)</div>
+        <div class="stage-scale"><span class="seg old"></span><span class="seg mature"></span><span class="seg young"></span><span class="stage-marker" style="left:11.46%"></span></div>
+        <div class="stage-labels"><span>Old</span><span>Mature</span><span>Young</span></div>
+        <div class="stage-desc">Advanced erosion, stable low-relief alluvial landscape. Statistical method (Pike &amp; Wilson, 1971).</div>
+        <div class="stage-plain">In simple terms: erosion has worn most of the original highland down to low, gentle ground, with only a few hard-rock hills (monadnocks) still standing.</div>
+      </div>
     </div>
 
-    <div class="stat-box" style="margin-top:12px;">
-      <div style="font-size:11px; text-transform:uppercase; letter-spacing:0.5px; color:var(--muted); margin-bottom:4px;">Hypsometric Integral (HI) &mdash; anomalies reclassified as 0 m</div>
+    <div class="stat-box case-card" style="margin-top:12px;">
+      <div class="case-label">Alternative case</div>
+      <div class="case-title">Hypsometric Integral (HI) with the &minus;16 m anomalies set to 0 m</div>
+      <div class="case-why">The true elevation of these pixels is unknown, so this is a sensitivity check, not a measured result.</div>
       <b style="font-size:17px;">HI = 0.1092</b>
-      <div style="font-size:11.5px; margin-top:2px;">If the localized elevation anomalies (down to &minus;16 m) are reclassified as 0 m for practical consideration, the basin minimum becomes H<sub>min</sub> = 0 m and the mean elevation H<sub>mean</sub> = 289.28 m, so HI = (289.28 &minus; 0) / (2649 &minus; 0) = 0.1092. This is 0.0054 lower than the value above and does not change the Geomorphic Stage: Old (Monadnock). Statistical method (Pike &amp; Wilson, 1971).</div>
+      <div style="font-size:11.5px; margin-top:2px;">If the localized elevation anomalies (down to &minus;16 m) are reclassified as 0 m for practical consideration, the basin minimum becomes H<sub>min</sub> = 0 m and the mean elevation H<sub>mean</sub> = 289.28 m, so HI = (289.28 &minus; 0) / (2649 &minus; 0) = 0.1092. This is 0.0054 lower than the value above and does not change the stage below.</div>
+      <div class="stage-callout">
+        <div class="stage-kicker">Geomorphic Stage</div>
+        <div class="stage-name">Old (Monadnock)</div>
+        <div class="stage-scale"><span class="seg old"></span><span class="seg mature"></span><span class="seg young"></span><span class="stage-marker" style="left:10.92%"></span></div>
+        <div class="stage-labels"><span>Old</span><span>Mature</span><span>Young</span></div>
+        <div class="stage-desc">Advanced erosion, stable low-relief alluvial landscape. Statistical method (Pike &amp; Wilson, 1971).</div>
+        <div class="stage-plain">In simple terms: erosion has worn most of the original highland down to low, gentle ground, with only a few hard-rock hills (monadnocks) still standing.</div>
+      </div>
     </div>
 
     <h2>Filter by Cultural Group</h2>
